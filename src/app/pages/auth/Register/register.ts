@@ -20,20 +20,52 @@ import { PasswordModule } from 'primeng/password';
 })
 export class RegisterComponent {
 
-  parentName = '';
-  email = '';
-  childName = '';
-  age = '';
-  password = '';
-  confirmPassword = '';
+  // بيانات ولي الأمر
+  fullName: string = '';
+  email: string = '';
+
+  // بيانات الطفل
+  childName: string = '';
+  childAge: number | null = null;
+
+  // الأمان
+  password: string = '';
+  confirmPassword: string = '';
 
   register() {
-    console.log({
-      parentName: this.parentName,
+
+    // تحقق بسيط قبل الإرسال
+    if (!this.fullName || !this.email || !this.childName || !this.childAge || !this.password || !this.confirmPassword) {
+      alert('من فضلك املئي جميع البيانات ');
+      return;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      alert('كلمتا السر غير متطابقتين');
+      return;
+    }
+
+    console.log('Register Data:', {
+      fullName: this.fullName,
       email: this.email,
       childName: this.childName,
-      age: this.age,
+      childAge: this.childAge,
       password: this.password
     });
+
+    alert('تم إنشاء الحساب بنجاح 🎉');
   }
+}
+
+  export class Register {
+
+  children = [
+    { name: '', age: '' }
+  ];
+
+  addChild() {
+    console.log("clicked");   // عشان نتأكد إنها بتتنفذ
+    this.children.push({ name: '', age: '' });
+  }
+
 }

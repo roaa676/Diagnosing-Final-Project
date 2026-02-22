@@ -1,53 +1,141 @@
-<div class="container">
-    <div class="form-section">
+<div class="auth-wrapper">
+<div class="top-header">
 
-        <a href="#" class="back-btn">← رجوع</a>
-
-        <div class="form-header">
-            <h1>إنشاء حساب جديد</h1>
-            <p>
-                هل لديك حساب بالفعل؟
-                <a href="login.html">تسجيل الدخول</a>
-            </p>
-        </div>
-
-        <form>
-
-            <label>الاسم الكامل</label>
-            <input type="text" placeholder="ادخل اسمك">
-
-            <label>البريد الإلكتروني</label>
-            <input type="email" placeholder="name@example.com">
-
-            <label>كلمة السر</label>
-            <input type="password" placeholder="********">
-
-            <label>تأكيد كلمة السر</label>
-            <input type="password" placeholder="********">
-
-            <button type="submit">إنشاء الحساب وبدء الرحلة</button>
-
-        </form>
-
-    </div>
-
-
+   <div class="back-link">
+  </div>
+    <div class="brand">
     
-    <div class="side-section">
-        <div class="side-content">
-            <img src="child.png" alt="طفل">
+  </div>
 
-            <h2>
-                رحلة تعلم ممتعة <br>
-                <span>تبدأ من هنا</span>
-            </h2>
+</div>
+   
+  <!-- Back Link -->
+ 
 
-            <p>
-                بوصلـه يساعدك في فهم طفلك بشكل أفضل
-                وتشخيص صعوبات التعلم بطرق علمية مبسطة ومرحة
-            </p>
-        </div>
+  
+  <div class="right-section">
+    <div class="welcome-content">
+      <img src="assets/images/LoginIMG.png" alt="Register Image">
+      <h2>
+        رحلة تعلم ممتعة<br>
+        <span class="highlight-text">تبدأ من هنا</span>
+      </h2>
+
+      <p>
+        بوصلة يساعدك في فهم طفلك بشكل أفضل وتشخيص صعوبات
+        التعلم بأساليب علمية مبسطة ومريحة.
+      </p>
     </div>
+  </div>
+
+  <div class="left-section">
+    <div class="form-container">
+
+      <h2 class="title">إنشاء حساب جديد</h2>
+      <p class="subtitle">هل لديك حساب بالفعل؟ <a routerLink="/register">تسجيل دخول</a>
+      <div class="section-title">بيانات ولي الأمر</div>
+
+      <div class="field">
+        <label>الاسم الكامل</label>
+        <span class="p-input-icon-left custom-input">
+          <i class="pi pi-user"></i>
+          <input pInputText [(ngModel)]="fullName" placeholder="ادخل الاسم الثنائي أو الثلاثي" />
+        </span>
+      </div>
+
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <span class="p-input-icon-left custom-input">
+          <i class="pi pi-envelope"></i>
+          <input pInputText [(ngModel)]="email" placeholder="name@example.com" />
+        </span>
+      </div>
+
+<!-- بيانات الطفل -->
+<div class="section-title">
+  <i class="pi pi-user"></i>
+  بيانات الطفل
+</div>
+
+<div *ngFor="let child of children; let i = index" class="child-card">
+
+  <div class="child-row">
+
+    <div class="field half">
+      <label>اسم الطفل</label>
+      <input
+        pInputText
+        [(ngModel)]="child.name"
+        name="childName{{i}}"
+        placeholder="اسم الطفل الأول" />
+    </div>
+
+    <div class="field half">
+      <label>العمر</label>
+      <input
+        pInputText
+        type="number"
+        [(ngModel)]="child.age"
+        name="childAge{{i}}"
+        placeholder="7 سنوات" />
+    </div>
+
+  </div>
 
 </div>
 
+<button
+  pButton
+  type="button"
+  icon="pi pi-plus"
+  label="إضافة طفل آخر"
+  class="add-child-btn"
+  (click)="addChild()">
+</button>
+
+      <!-- كلمة المرور -->
+      <div class="section-title">
+  <i class="pi pi-lock"></i>
+  التأمين
+</div>
+
+<div class="password-row">
+
+  <div class="field half">
+    <label>كلمة السر</label>
+    <p-password
+      [(ngModel)]="password"
+      [feedback]="false"
+      [toggleMask]="true"
+      placeholder="********">
+    </p-password>
+  </div>
+
+  <div class="field half">
+    <label>تأكيد كلمة السر</label>
+    <p-password
+      [(ngModel)]="confirmPassword"
+      [feedback]="false"
+      [toggleMask]="true"
+      placeholder="********">
+    </p-password>
+  </div>
+
+</div>
+
+      <!-- زر إنشاء الحساب -->
+      <button
+        pButton
+        label="إنشاء الحساب  وبدء الرحلة"
+         
+        class="login-btn"
+        (click)="register()">
+      </button>
+
+    </div>
+  </div>
+
+</div>
+
+
+  
