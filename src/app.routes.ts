@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AppLayout } from './app/core/shared/layout/app-layout';
 import { Documentation } from './app/pages/documentation/documentation';
 import { Notfound } from './app/pages/notfound/notfound';
-import { Dashboard } from '@/pages/Dashboard/dashboard';
+import { Dashboard } from '@/pages/dashboard/dashboard';
 import { Dashboardd } from '@/pages/dashboardd/dashboardd';
 
 
