@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common'; 
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -9,6 +10,7 @@ import { PasswordModule } from 'primeng/password';
   selector: 'app-register',
   standalone: true,
   imports: [
+    CommonModule,   
     FormsModule,
     RouterModule,
     ButtonModule,
@@ -20,23 +22,28 @@ import { PasswordModule } from 'primeng/password';
 })
 export class RegisterComponent {
 
-  // بيانات ولي الأمر
+  
   fullName: string = '';
   email: string = '';
 
-  // بيانات الطفل
-  childName: string = '';
-  childAge: number | null = null;
+  
+  children = [
+    { name: '', age: null }
+  ];
 
   // الأمان
   password: string = '';
   confirmPassword: string = '';
 
+  addChild() {
+    console.log("clicked");
+    this.children.push({ name: '', age: null });
+  }
+
   register() {
 
-    // تحقق بسيط قبل الإرسال
-    if (!this.fullName || !this.email || !this.childName || !this.childAge || !this.password || !this.confirmPassword) {
-      alert('من فضلك املئي جميع البيانات ');
+    if (!this.fullName || !this.email || !this.password || !this.confirmPassword) {
+      alert('من فضلك املئي جميع البيانات');
       return;
     }
 
@@ -48,24 +55,10 @@ export class RegisterComponent {
     console.log('Register Data:', {
       fullName: this.fullName,
       email: this.email,
-      childName: this.childName,
-      childAge: this.childAge,
+      children: this.children,
       password: this.password
     });
 
     alert('تم إنشاء الحساب بنجاح 🎉');
   }
-}
-
-  export class Register {
-
-  children = [
-    { name: '', age: '' }
-  ];
-
-  addChild() {
-    console.log("clicked");   // عشان نتأكد إنها بتتنفذ
-    this.children.push({ name: '', age: '' });
-  }
-
 }
