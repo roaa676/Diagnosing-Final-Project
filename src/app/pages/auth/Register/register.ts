@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common'; 
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -9,6 +10,7 @@ import { PasswordModule } from 'primeng/password';
   selector: 'app-register',
   standalone: true,
   imports: [
+    CommonModule,   
     FormsModule,
     RouterModule,
     ButtonModule,
@@ -22,16 +24,43 @@ export class RegisterComponent {
 
   constructor(private router: Router) { }
 
-  parentName = '';
-  email = '';
-  childName = '';
-  age = '';
-  password = '';
-  confirmPassword = '';
+  
+  fullName: string = '';
+  email: string = '';
+
+  
+  children = [
+    { name: '', age: null }
+  ];
+
+  password: string = '';
+  confirmPassword: string = '';
+
+  addChild() {
+    console.log("clicked");
+    this.children.push({ name: '', age: null });
+  }
 
   register() {
-    console.log('Registered');
 
+    if (!this.fullName || !this.email || !this.password || !this.confirmPassword) {
+      alert('من فضلك املئي جميع البيانات');
+      return;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      alert('كلمتا السر غير متطابقتين');
+      return;
+    }
+
+    console.log('Register Data:', {
+      fullName: this.fullName,
+      email: this.email,
+      children: this.children,
+      password: this.password
+    });
+
+    alert('تم إنشاء الحساب بنجاح 🎉');
     this.router.navigate(['/dashboard']);
   }
 }

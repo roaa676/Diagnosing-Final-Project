@@ -6,6 +6,7 @@ import { TrainingComponent } from '@/pages/Training/training';
 import { TrainingLevelsComponent } from '@/pages/Training/Training-Levels/training-levels';
 
 
+
 export const appRoutes: Routes = [
     {
         path: '',

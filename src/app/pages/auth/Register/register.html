@@ -1,41 +1,48 @@
-<div class="login-wrapper">
-  <div class="back-link">
-    <a routerLink="/dashboard">&#8592; رجوع</a>
+<div class="auth-wrapper">
+
+  <!-- Header -->
+
+  <div class="top-header">
+    <div class="back-link">
+      <a routerLink="/dashboard">&#8592; رجوع</a>
+    </div>
   </div>
 
   <div class="right-section">
     <div class="welcome-content">
-      <img src="assets/images/homeIMG.png" alt="طفل">
+      <img src="assets/images/LoginIMG.png" alt="Register Image">
       <h2>
         رحلة تعلم ممتعة<br>
         <span class="highlight-text">تبدأ من هنا</span>
       </h2>
-
       <p>
-        بوصلة يساعدك في فهم طفلك بشكل أفضل
-        وتشخيص صعوبات التعلم بطرق علمية مبسطة ومرحة.
+        بوصلة يساعدك في فهم طفلك بشكل أفضل وتشخيص صعوبات
+        التعلم بأساليب علمية مبسطة ومريحة.
       </p>
     </div>
   </div>
 
   <div class="left-section">
     <div class="form-container">
+
+      ```
       <h2 class="title">إنشاء حساب جديد</h2>
       <p class="subtitle">
         هل لديك حساب بالفعل؟
         <a routerLink="/auth/login">تسجيل الدخول</a>
       </p>
 
+      <!-- FORM -->
       <form (ngSubmit)="register()">
+
+        <!-- بيانات ولي الأمر -->
+        <div class="section-title">بيانات ولي الأمر</div>
+
         <div class="field">
           <label>الاسم الكامل</label>
           <span class="p-input-icon-left custom-input">
             <i class="pi pi-user"></i>
-            <input
-              pInputText
-              [(ngModel)]="parentName"
-              name="parentName"
-              placeholder="ادخل اسمك">
+            <input pInputText [(ngModel)]="fullName" name="fullName" placeholder="ادخل الاسم الثنائي أو الثلاثي" />
           </span>
         </div>
 
@@ -43,69 +50,70 @@
           <label>البريد الإلكتروني</label>
           <span class="p-input-icon-left custom-input">
             <i class="pi pi-envelope"></i>
-            <input
-              pInputText
-              [(ngModel)]="email"
-              name="email"
-              placeholder="name@example.com">
+            <input pInputText [(ngModel)]="email" name="email" placeholder="name@example.com" />
           </span>
         </div>
 
-        <div class="field">
-          <label>اسم الطفل</label>
-          <span class="p-input-icon-left custom-input">
-            <i class="pi pi-user"></i>
-            <input
-              pInputText
-              [(ngModel)]="childName"
-              name="childName"
-              placeholder="ادخل اسم الطفل">
-          </span>
+        <!-- بيانات الطفل -->
+        <div class="section-title">
+          <i class="pi pi-user"></i>
+          بيانات الطفل
         </div>
 
-        <div class="field">
-          <label>العمر</label>
-          <span class="p-input-icon-left custom-input">
-            <i class="pi pi-calendar"></i>
-            <input
-              pInputText
-              [(ngModel)]="age"
-              name="age"
-              type="number"
-              min="0"
-              placeholder="مثال: 6">
-          </span>
+        <div *ngFor="let child of children; let i = index" class="child-card">
+          <div class="child-row">
+
+            <div class="field half">
+              <label>اسم الطفل</label>
+              <input pInputText [(ngModel)]="child.name" name="childName{{i}}" placeholder="اسم الطفل" />
+            </div>
+
+            <div class="field half">
+              <label>العمر</label>
+              <input pInputText type="number" [(ngModel)]="child.age" name="childAge{{i}}" placeholder="7 سنوات" />
+            </div>
+
+          </div>
         </div>
 
-        <div class="field">
-          <label>كلمة السر</label>
-          <p-password
-            [(ngModel)]="password"
-            name="password"
-            [feedback]="false"
-            [toggleMask]="true"
-            styleClass="custom-password">
-          </p-password>
-        </div>
-
-        <div class="field">
-          <label>تأكيد كلمة السر</label>
-          <p-password
-            [(ngModel)]="confirmPassword"
-            name="confirmPassword"
-            [feedback]="false"
-            [toggleMask]="true"
-            styleClass="custom-password">
-          </p-password>
-        </div>
-
-        <button
-          pButton
-          type="submit"
-          label="إنشاء الحساب"
-          class="login-btn">
+        <!-- زرار إضافة طفل -->
+        <button pButton type="button" icon="pi pi-plus" label="إضافة طفل آخر" class="add-child-btn"
+          (click)="addChild()">
         </button>
+
+        <!-- كلمة المرور -->
+        <div class="section-title">
+          <i class="pi pi-lock"></i>
+          التأمين
+        </div>
+
+        <div class="password-row">
+
+          <div class="field half">
+            <label>كلمة السر</label>
+            <p-password [(ngModel)]="password" name="password" [feedback]="false" [toggleMask]="true"
+              placeholder="********">
+            </p-password>
+          </div>
+
+          <div class="field half">
+            <label>تأكيد كلمة السر</label>
+            <p-password [(ngModel)]="confirmPassword" name="confirmPassword" [feedback]="false" [toggleMask]="true"
+              placeholder="********">
+            </p-password>
+          </div>
+
+        </div>
+
+        <!-- زر إنشاء الحساب -->
+        <button pButton type="submit" label="إنشاء الحساب وبدء الرحلة" class="login-btn">
+        </button>
+
       </form>
+
     </div>
+    ```
+
   </div>
+
 </div>
