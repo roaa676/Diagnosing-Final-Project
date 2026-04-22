@@ -1,79 +1,75 @@
 <div class="login-wrapper">
+  <section class="login-form-side">
+    <div class="form-container">
+      <h2 class="title">تسجيل الدخول</h2>
+      <p class="subtitle">مرحباً بعودتك، لِنُواصِل رحلة التعلم.</p>
 
-   
-  <div class="back-link">
-    <a routerLink="/dashboard">&#8592; رجوع</a>
-  </div>
+      <form class="auth-form" (ngSubmit)="login()">
+        <div class="field">
+          <label>اسم ولي الأمر أو البريد الإلكتروني</label>
+          <span class="input-pill">
+            <i class="pi pi-user"></i>
+            <input
+              pInputText
+              class="login-input"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="البريد الإلكتروني" />
+          </span>
+        </div>
 
+        <div class="field">
+          <label>اسم الطفل</label>
+          <span class="input-pill">
+            <i class="pi pi-user"></i>
+            <input
+              pInputText
+              class="login-input"
+              [(ngModel)]="childName"
+              name="childName"
+              placeholder="أدخل اسم الطفل" />
+          </span>
+        </div>
 
-  
-  <div class="right-section">
-    <div class="welcome-content">
-      <img src="assets/images/LoginIMG.png" alt="Login Image">
-      <h2>
-  رحلة تعلم ممتعة<br>
-  <span class="highlight-text">تبدأ من هنا</span>
-</h2>
+        <div class="field">
+          <label>كلمة السر</label>
+          <span class="input-pill">
+            <i class="pi pi-lock"></i>
+            <input
+              pInputText
+              type="password"
+              class="login-input"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="••••••••" />
+          </span>
+        </div>
 
+        <div class="extra-links">
+          <a routerLink="/auth/register">تسجيل الدخول لأول مرة؟</a>
+          <a href="#" class="forgot-link">نسيت كلمة السر؟</a>
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          class="login-btn"
+          icon="pi pi-arrow-left"
+          iconPos="left"
+          label="تسجيل الدخول">
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <section class="login-hero-side">
+    <div class="hero-content">
+      <img src="assets/images/LoginIMG.png" alt="طفل يتعلم">
+      <h1>رحلة تعلم ممتعة<br><span>تبدأ من هنا</span></h1>
       <p>
         بوصلة يساعدك في فهم طفلك بشكل أفضل وتشخيص صعوبات
-        التعلم بأساليب علمية مبسطة ومريحة.
+        التعلم بطرق علمية مبسطة ومُريحة.
       </p>
     </div>
-  </div>
-
-  
-<div class="left-section">
-<div class="form-header"></div>
-  <div class="form-container">
-
-    <h2 class="title">تسجيل الدخول</h2>
-    <p class="subtitle">مرحباً بعودتك! لنتابع رحلة التعلم</p>
-
-    
-<div class="field">
-  <label>اسم ولي الأمر أو البريد الالكتروني</label>
-  <span class="p-input-icon-left custom-input">
-    <i class="pi pi-envelope"></i>
-    <input pInputText [(ngModel)]="email" placeholder="البريد الإلكتروني" />
-  </span>
-</div>
-
-
-<div class="field">
-  <label>اسم الطفل</label>
-  <span class="p-input-icon-left custom-input">
-    <i class="pi pi-user"></i>
-    <input pInputText [(ngModel)]="childName" placeholder="ادخل اسم الطفل" />
-  </span>
-</div>
-
-
-<div class="field">
-  <label>كلمة السر</label>
-  <p-password
-    [(ngModel)]="password"
-    [feedback]="false"
-    [toggleMask]="true"
-    styleClass="custom-password">
-  </p-password>
-</div>
-
-    
-    <div class="extra-links">
-      <a routerLink="/auth/register">إنشاء حساب جديد</a>
-    <a href="#" class="forgot-link">نسيت كلمة السر؟</a>
-
-    </div>
-
-    
-    <button
-      pButton
-      label="تسجيل الدخول"
-      class="login-btn"
-      (click)="login()">
-    </button>
-
-  </div>
-
+  </section>
 </div>
