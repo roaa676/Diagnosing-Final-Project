@@ -4,16 +4,15 @@
         <div class="flex items-center justify-between w-full h-16 px-5 lg:px-8 relative" dir="ltr">
         
             <div class="flex items-center gap-4 shrink-0">
-                <button pButton pRipple icon="pi pi-users" class="text-2xl" [rounded]="true"
+                <button pButton pRipple icon="pi pi-users" class="text-2xl" [rounded]="true" navigateTo="/auth/login"
                     (click)="menu?.toggle($event)"></button>
                 <p-menu #menu [model]="items" [popup]="true" styleClass="rounded-xl shadow-lg"></p-menu>
-                <app-floating-configurator [float]="false"></app-floating-configurator>
             </div>
         
             <div class="absolute left-1/2 -translate-x-1/2">
                 <ul class="list-none p-0 m-0 flex items-center select-none gap-8">
                     <li>
-                        <a (click)="router.navigate(['/landing'], { fragment: 'التدريبات' })" pRipple
+                        <a (click)="router.navigate(['/training'], { fragment: 'التدريبات' })" pRipple
                             class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
                             التدريبات
                         </a>
@@ -31,7 +30,7 @@
                         </a>
                     </li>
                     <li>
-                        <a (click)="router.navigate(['/landing'], { fragment: ' التعرف على صعوبات التعلم' })" pRipple
+                        <a (click)="router.navigate(['/learning-difficulties'], { fragment: ' التعرف على صعوبات التعلم' })" pRipple
                             class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
                             التعرف على صعوبات التعلم
                         </a>
@@ -103,7 +102,6 @@
         
         </div>
 
-        <!-- FEATURES SECTION -->
         <div id="features" class="py-6 px-6 lg:px-20 mt-8 mx-0 lg:mx-20">
             <div class="grid grid-cols-12 gap-4 justify-center">
                 <div class="col-span-12 text-center mt-20 mb-6">

@@ -5,13 +5,12 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
 import { MenuItem } from 'primeng/api';
-import { AppFloatingConfigurator } from '@/layout/component/app.floatingconfigurator';
 import { MenuModule } from 'primeng/menu';
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.html',
-    imports: [RouterModule, RippleModule, MenuModule , StyleClassModule, ButtonModule, DividerModule, AppFloatingConfigurator],
+    imports: [RouterModule, RippleModule, MenuModule , StyleClassModule, ButtonModule, DividerModule],
 })
 export class Dashboard {
     items: MenuItem[] = [];
@@ -22,7 +21,7 @@ export class Dashboard {
                 label: 'إنشاء حساب',
                 icon: 'pi pi-user-plus',
                 command: () => {
-                    this.router.navigate(['/register']);
+                    this.router.navigate(['/auth/register']);
                 }
             },
             {

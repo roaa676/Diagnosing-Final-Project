@@ -1,0 +1,23 @@
+    <div class="training-page">
+        <section class="training-hero">
+            <h1>التدريبات</h1>
+            <p>
+                استكشف أنواع الصعوبات المختلفة والتدريبات المخصصة لكل نوع لمساعدة طفلك على التطور
+                والتحسن في بيئة داعمة.
+            </p>
+        </section>
+
+        <section class="training-grid" aria-label="قائمة التدريبات">
+            <button *ngFor="let training of trainings" type="button" class="training-card"
+                [ngClass]="'training-card--' + training.theme" (click)="openTraining(training)">
+                <div class="card-media">
+                    <img [src]="training.image" [alt]="training.title">
+                </div>
+
+                <div class="card-body">
+                    <h2>{{ training.title }}</h2>
+                    <p>{{ training.description }}</p>
+                </div>
+            </button>
+        </section>
+    </div>

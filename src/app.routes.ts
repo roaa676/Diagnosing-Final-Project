@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/core/shared/layout/app-layout';
-import { Documentation } from './app/pages/documentation/documentation';
-import { Notfound } from './app/pages/notfound/notfound';
-import { Dashboard } from '@/pages/dashboard/dashboard';
-import { Dashboardd } from '@/pages/dashboardd/dashboardd';
+import { Dashboard } from '@/pages/Dashboard/dashboard';
+import { LearningDifficultiesComponent } from './app/pages/Learning-difficulties/Learning-difficulties';
+import { TrainingComponent } from '@/pages/Training/training';
+import { TrainingLevelsComponent } from '@/pages/Training/Training-Levels/training-levels';
+
 
 
 export const appRoutes: Routes = [
@@ -11,14 +12,16 @@ export const appRoutes: Routes = [
         path: '',
         component: AppLayout,
         children: [
-            { path: '', component: Dashboardd },
-            { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
-            { path: 'documentation', component: Documentation },
+            { path: '', component: Dashboard },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]
     },
     { path: 'dashboard', component: Dashboard },
-    { path: 'notfound', component: Notfound },
+    { path: 'login', redirectTo: 'auth/login', pathMatch: 'full' },
+    { path: 'register', redirectTo: 'auth/register', pathMatch: 'full' },
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
+    { path: 'learning-difficulties', component: LearningDifficultiesComponent },
+    { path: 'training/levels', component: TrainingLevelsComponent },
+    { path: 'training', component: TrainingComponent },
     { path: '**', redirectTo: '/dashboard' }
 ];

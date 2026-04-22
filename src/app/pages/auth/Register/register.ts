@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common'; 
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -22,6 +22,8 @@ import { PasswordModule } from 'primeng/password';
 })
 export class RegisterComponent {
 
+  constructor(private router: Router) { }
+
   
   fullName: string = '';
   email: string = '';
@@ -31,7 +33,6 @@ export class RegisterComponent {
     { name: '', age: null }
   ];
 
-  // الأمان
   password: string = '';
   confirmPassword: string = '';
 
@@ -60,5 +61,6 @@ export class RegisterComponent {
     });
 
     alert('تم إنشاء الحساب بنجاح 🎉');
+    this.router.navigate(['/dashboard']);
   }
 }

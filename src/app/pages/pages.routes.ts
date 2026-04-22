@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
-import { Documentation } from './documentation/documentation';
-import { Crud } from './crud/crud';
-import { Empty } from './empty/empty';
+
 
 export default [
-    { path: 'documentation', component: Documentation },
-    { path: 'crud', component: Crud },
-    { path: 'empty', component: Empty },
-    { path: '**', redirectTo: '/notfound' }
+    { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+    { path: 'login', redirectTo: '/auth/login', pathMatch: 'full' },
+    { path: 'register', redirectTo: '/auth/register', pathMatch: 'full' },
+    { path: 'learning-difficulties', redirectTo: '/learning-difficulties', pathMatch: 'full' },
+    { path: 'training', redirectTo: '/training', pathMatch: 'full' },
+    { path: '**', redirectTo: '/dashboard' }
 ] as Routes;
