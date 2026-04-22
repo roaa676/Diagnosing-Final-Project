@@ -1,0 +1,193 @@
+:host {
+    direction: rtl;
+    display: block;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 40px auto;
+    background-color: #ffffff;
+    padding: 20px;
+}
+
+.header-section {
+    position: relative;
+    margin-bottom: 40px;
+    text-align: right;
+}
+
+.back-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border: 1px solid #eee;
+    background: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.sub-tag {
+    background: #eafaf1;
+    color: #2ecc71;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.title-content h1 {
+    font-size: 2.5rem;
+    margin: 15px 0;
+    color: #1a1a1a;
+}
+
+.desc {
+    color: #666;
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+.card {
+    display: flex;
+    background: #fff;
+    border-radius: 30px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f0f0f0;
+    gap: 30px;
+}
+
+.main-info {
+    width: 20%;
+    text-align: center;
+}
+
+.details-section {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.symptoms-section {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.green-theme {
+    border-top: 6px solid #2ecc71;
+}
+
+.purple-theme {
+    border-top: 6px solid #9b59b6;
+}
+
+.pink-theme {
+    border-top: 6px solid #e91e63;
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.green-theme .icon-circle {
+    background: #eafaf1;
+    color: #2ecc71;
+}
+
+.latin-name {
+    display: block;
+    color: #999;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.illustration-box {
+    height: 120px;
+    border-radius: 20px;
+    background-color: #fcece5;
+}
+
+h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.training-box,
+.parent-guide {
+    padding: 20px;
+    border-radius: 20px;
+    margin-top: 15px;
+}
+
+.training-box {
+    background-color: #fff9f3;
+}
+
+.parent-guide {
+    background-color: #f0f7ff;
+}
+
+.pills span {
+    display: inline-block;
+    padding: 6px 15px;
+    background: #fff;
+    border-radius: 10px;
+    margin: 5px;
+    font-size: 13px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.view-all {
+    color: #e67e22;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    position: relative;
+    padding-right: 20px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #444;
+}
+
+ul li::before {
+    content: "•";
+    color: #2ecc71;
+    position: absolute;
+    right: 0;
+    font-size: 20px;
+}
+
+@media (max-width: 992px) {
+    .card {
+        flex-direction: column;
+    }
+
+    .main-info,
+    .details-section,
+    .symptoms-section {
+        width: 100%;
+    }
+}

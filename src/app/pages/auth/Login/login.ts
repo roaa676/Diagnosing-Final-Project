@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
@@ -25,14 +25,15 @@ import { RippleModule } from 'primeng/ripple';
 })
 export class Login {
 
+    constructor(private router: Router) { }
+
     email: string = '';
     childName: string = '';
     password: string = '';
-    checked: boolean = false;
 
     login() {
         console.log('Email:', this.email);
-        console.log('Child Name:', this.childName);
-        console.log('Password:', this.password);
+
+        this.router.navigate(['/dashboard']);
     }
 }

@@ -1,53 +1,111 @@
-<div class="container">
-    <div class="form-section">
+<div class="login-wrapper">
+  <div class="back-link">
+    <a routerLink="/dashboard">&#8592; رجوع</a>
+  </div>
 
-        <a href="#" class="back-btn">← رجوع</a>
+  <div class="right-section">
+    <div class="welcome-content">
+      <img src="assets/images/homeIMG.png" alt="طفل">
+      <h2>
+        رحلة تعلم ممتعة<br>
+        <span class="highlight-text">تبدأ من هنا</span>
+      </h2>
 
-        <div class="form-header">
-            <h1>إنشاء حساب جديد</h1>
-            <p>
-                هل لديك حساب بالفعل؟
-                <a href="login.html">تسجيل الدخول</a>
-            </p>
+      <p>
+        بوصلة يساعدك في فهم طفلك بشكل أفضل
+        وتشخيص صعوبات التعلم بطرق علمية مبسطة ومرحة.
+      </p>
+    </div>
+  </div>
+
+  <div class="left-section">
+    <div class="form-container">
+      <h2 class="title">إنشاء حساب جديد</h2>
+      <p class="subtitle">
+        هل لديك حساب بالفعل؟
+        <a routerLink="/auth/login">تسجيل الدخول</a>
+      </p>
+
+      <form (ngSubmit)="register()">
+        <div class="field">
+          <label>الاسم الكامل</label>
+          <span class="p-input-icon-left custom-input">
+            <i class="pi pi-user"></i>
+            <input
+              pInputText
+              [(ngModel)]="parentName"
+              name="parentName"
+              placeholder="ادخل اسمك">
+          </span>
         </div>
 
-        <form>
-
-            <label>الاسم الكامل</label>
-            <input type="text" placeholder="ادخل اسمك">
-
-            <label>البريد الإلكتروني</label>
-            <input type="email" placeholder="name@example.com">
-
-            <label>كلمة السر</label>
-            <input type="password" placeholder="********">
-
-            <label>تأكيد كلمة السر</label>
-            <input type="password" placeholder="********">
-
-            <button type="submit">إنشاء الحساب وبدء الرحلة</button>
-
-        </form>
-
-    </div>
-
-
-    
-    <div class="side-section">
-        <div class="side-content">
-            <img src="child.png" alt="طفل">
-
-            <h2>
-                رحلة تعلم ممتعة <br>
-                <span>تبدأ من هنا</span>
-            </h2>
-
-            <p>
-                بوصلـه يساعدك في فهم طفلك بشكل أفضل
-                وتشخيص صعوبات التعلم بطرق علمية مبسطة ومرحة
-            </p>
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <span class="p-input-icon-left custom-input">
+            <i class="pi pi-envelope"></i>
+            <input
+              pInputText
+              [(ngModel)]="email"
+              name="email"
+              placeholder="name@example.com">
+          </span>
         </div>
-    </div>
 
+        <div class="field">
+          <label>اسم الطفل</label>
+          <span class="p-input-icon-left custom-input">
+            <i class="pi pi-user"></i>
+            <input
+              pInputText
+              [(ngModel)]="childName"
+              name="childName"
+              placeholder="ادخل اسم الطفل">
+          </span>
+        </div>
+
+        <div class="field">
+          <label>العمر</label>
+          <span class="p-input-icon-left custom-input">
+            <i class="pi pi-calendar"></i>
+            <input
+              pInputText
+              [(ngModel)]="age"
+              name="age"
+              type="number"
+              min="0"
+              placeholder="مثال: 6">
+          </span>
+        </div>
+
+        <div class="field">
+          <label>كلمة السر</label>
+          <p-password
+            [(ngModel)]="password"
+            name="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            styleClass="custom-password">
+          </p-password>
+        </div>
+
+        <div class="field">
+          <label>تأكيد كلمة السر</label>
+          <p-password
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            [feedback]="false"
+            [toggleMask]="true"
+            styleClass="custom-password">
+          </p-password>
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="إنشاء الحساب"
+          class="login-btn">
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
-

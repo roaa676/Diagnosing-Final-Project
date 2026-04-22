@@ -1,0 +1,43 @@
+<div class="levels-page">
+    <section class="levels-hero">
+        <h1>مستويات التدريب</h1>
+        <p>
+            لقد قمنا بتحديد الصعوبة، الآن اختر المستوى المناسب للطفل للبدء في التمارين التفاعلية
+            والمساعدة في تطوير المهارات.
+        </p>
+    </section>
+
+    <section class="levels-grid" aria-label="مستويات التدريب">
+        <article
+            *ngFor="let level of levels"
+            class="level-card"
+            [ngClass]="'level-card--' + level.visualTheme">
+            <span
+                *ngIf="level.badge || level.badgeIcon"
+                class="level-badge"
+                [class.level-badge--locked]="!!level.badgeIcon">
+                <i *ngIf="level.badgeIcon" [class]="level.badgeIcon"></i>
+                <span>{{ level.badge }}</span>
+            </span>
+
+            <div class="level-visual">
+                <div class="level-glow"></div>
+            </div>
+
+            <div class="level-body">
+                <h2>{{ level.title }}</h2>
+                <p>{{ level.description }}</p>
+            </div>
+
+            <button
+                type="button"
+                class="level-button"
+                [ngClass]="'level-button--' + level.buttonVariant"
+                [disabled]="level.disabled"
+                (click)="startLevel(level)">
+                <i [class]="level.buttonIcon"></i>
+                <span>{{ level.buttonLabel }}</span>
+            </button>
+        </article>
+    </section>
+</div>

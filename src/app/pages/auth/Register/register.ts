@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -20,6 +20,8 @@ import { PasswordModule } from 'primeng/password';
 })
 export class RegisterComponent {
 
+  constructor(private router: Router) { }
+
   parentName = '';
   email = '';
   childName = '';
@@ -28,12 +30,8 @@ export class RegisterComponent {
   confirmPassword = '';
 
   register() {
-    console.log({
-      parentName: this.parentName,
-      email: this.email,
-      childName: this.childName,
-      age: this.age,
-      password: this.password
-    });
+    console.log('Registered');
+
+    this.router.navigate(['/dashboard']);
   }
 }

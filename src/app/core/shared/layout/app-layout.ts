@@ -2,24 +2,18 @@ import { Component, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
-import { AppTopbar } from './Topbar/app-topbar';
 import { AppFooter } from './Footer/app-footer';
 import { LayoutService } from '../../../layout/service/layout.service';
-import { AppSidebar } from './Sidebar/app-sidebar';
 
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter],
+    imports: [CommonModule, RouterModule, AppFooter],
     templateUrl: './app-layout.html',})
 export class AppLayout {
     overlayMenuOpenSubscription: Subscription;
 
     menuOutsideClickListener: any;
-
-    @ViewChild(AppSidebar) appSidebar!: AppSidebar;
-
-    @ViewChild(AppTopbar) appTopBar!: AppTopbar;
 
     constructor(
         public layoutService: LayoutService,

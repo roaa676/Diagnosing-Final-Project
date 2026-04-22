@@ -22,7 +22,7 @@ export class Dashboard {
                 label: 'إنشاء حساب',
                 icon: 'pi pi-user-plus',
                 command: () => {
-                    this.router.navigate(['/register']);
+                    this.router.navigate(['/auth/register']);
                 }
             },
             {

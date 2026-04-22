@@ -1,8 +1,8 @@
-<div class="auth.wrapper">
+<div class="login-wrapper">
 
    
   <div class="back-link">
-    <a href="#">&#8592; رجوع</a>
+    <a routerLink="/dashboard">&#8592; رجوع</a>
   </div>
 
 
@@ -55,14 +55,13 @@
     [(ngModel)]="password"
     [feedback]="false"
     [toggleMask]="true"
-    placeholder="********"
     styleClass="custom-password">
   </p-password>
 </div>
 
     
     <div class="extra-links">
-      <a href="#">تسجيل الدخول لأول مرة</a>
+      <a routerLink="/auth/register">إنشاء حساب جديد</a>
     <a href="#" class="forgot-link">نسيت كلمة السر؟</a>
 
     </div>
