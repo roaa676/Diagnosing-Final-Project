@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
 
 @Component({
     selector: 'app-login',
@@ -12,9 +13,10 @@ import { InputTextModule } from 'primeng/inputtext';
         InputTextModule,
         FormsModule,
         RouterModule,
+        PasswordModule
     ],
     templateUrl: './login.html',
-    styleUrls: ['../auth.css']
+    styleUrl: '../auth.css',
 
 })
 export class Login {
