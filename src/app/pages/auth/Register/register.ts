@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -22,7 +23,10 @@ import { PasswordModule } from 'primeng/password';
 })
 export class RegisterComponent {
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) { }
 
   
   fullName: string = '';
@@ -35,6 +39,7 @@ export class RegisterComponent {
 
   password: string = '';
   confirmPassword: string = '';
+  isLoading: boolean = false;
 
   addChild() {
     console.log("clicked");
@@ -53,14 +58,28 @@ export class RegisterComponent {
       return;
     }
 
-    console.log('Register Data:', {
-      fullName: this.fullName,
-      email: this.email,
-      children: this.children,
-      password: this.password
-    });
+    // Validate that all children have names and ages
+    for (let child of this.children) {
+      if (!child.name || !child.age) {
+        alert('من فضلك املئي بيانات جميع الأطفال');
+        return;
+      }
+    }
 
-    alert('تم إنشاء الحساب بنجاح 🎉');
-    this.router.navigate(['/dashboard']);
+    this.isLoading = true;
+    this.authService.register(this.fullName, this.email, this.password, this.confirmPassword, this.children)
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          alert('تم إنشاء الحساب بنجاح 🎉');
+          console.log('Registration successful:', response);
+          this.router.navigate(['/dashboard']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Registration error:', error);
+          alert(error.error?.message || 'فشل إنشاء الحساب');
+        }
+      });
   }
 }
