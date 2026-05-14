@@ -55,7 +55,7 @@
           <a href="#" class="forgot-link">نسيت كلمة السر؟</a>
         </div>
 
-        <button pButton type="submit" label="تسجيل الدخول" class="login-btn">
+        <button pButton type="submit" label="تسجيل الدخول" class="login-btn" [disabled]="isLoading" [loading]="isLoading">
         </button>
 
       </form>

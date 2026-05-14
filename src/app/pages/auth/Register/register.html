@@ -96,7 +96,7 @@
 
         </div>
 
-        <button pButton type="submit" label="إنشاء الحساب وبدء الرحلة" class="login-btn">
+        <button pButton type="submit" label="إنشاء الحساب وبدء الرحلة" class="login-btn" [disabled]="isLoading" [loading]="isLoading">
         </button>
 
       </form>
