@@ -7,8 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 
-type SectionKey = 'personal-info' | 'children' | 'support' | 'notifications' | 'logout';
-
+type SectionKey = 'personal-info' | 'children' | 'support' | 'notifications';
 type NavTone = 'green' | 'purple' | 'blue' | 'gray';
 
 interface NavigationItem {
@@ -22,12 +21,18 @@ interface ChildProfile {
     name: string;
     details: string;
     avatar: string;
-    accent: 'green' | 'purple';
 }
 
 interface SupportItem {
     label: string;
     icon: string;
+}
+
+interface NotificationSetting {
+    id: string;
+    title: string;
+    description: string;
+    enabled: boolean;
 }
 
 @Component({
@@ -67,16 +72,14 @@ export class ProfileComponent {
 
     readonly childProfiles: ChildProfile[] = [
         {
-            name: 'أحمد',
-            details: '8 سنوات • المستوى 3',
-            avatar: 'assets/images/boy.png',
-            accent: 'green'
+            name: 'عمر',
+            details: '8 سنوات • المستوى 1',
+            avatar: 'assets/images/boy.png'
         },
         {
-            name: 'ندى',
-            details: '6 سنوات • المستوى 1',
-            avatar: 'assets/images/Girl.png',
-            accent: 'purple'
+            name: 'ليلى',
+            details: '6 سنوات • المستوى 2',
+            avatar: 'assets/images/Girl.png'
         }
     ];
 
@@ -91,25 +94,33 @@ export class ProfileComponent {
         }
     ];
 
+    readonly notificationSettings: NotificationSetting[] = [
+        {
+            id: 'progress',
+            title: 'إشعارات التقدم',
+            description: 'عند إكمال مستوى جديد أو تحقيق إنجاز',
+            enabled: true
+        },
+        {
+            id: 'email',
+            title: 'إشعارات البريد',
+            description: 'عند استلام رسائل أو تحديثات مهمة',
+            enabled: true
+        }
+    ];
+
     activeSection: SectionKey = 'personal-info';
 
     profileForm = new FormGroup({
-        guardianName: new FormControl(''),
-        email: new FormControl(''),
-        password: new FormControl('')
+        guardianName: new FormControl('أحمد علي'),
+        email: new FormControl('ahmed@example.com'),
+        password: new FormControl('12345678')
     });
 
     constructor(private readonly router: Router) {}
 
     setActiveSection(section: SectionKey): void {
         this.activeSection = section;
-
-        if (section === 'notifications') {
-            return;
-        }
-
-        const element = document.getElementById(section);
-        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     navButtonClass(item: NavigationItem): string {
@@ -140,6 +151,14 @@ export class ProfileComponent {
 
     openSupportItem(item: SupportItem): void {
         console.log('Support item:', item.label);
+    }
+
+    trackByNotification(_: number, item: NotificationSetting): string {
+        return item.id;
+    }
+
+    toggleNotification(setting: NotificationSetting): void {
+        setting.enabled = !setting.enabled;
     }
 
     logout(): void {

@@ -1,80 +1,111 @@
-<div class="container">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<div class="learning-page" dir="rtl">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <div class="header-section">
-    
-    <div class="title-content">
-    <div class="sub-tag">
-    <i class="fa-solid fa-compass" style="margin-left: 8px;"></i>
-    
-    <span>دليل التشخيص</span>
-</div>
-      
-      <h1>التعرف على الصعوبات</h1>
-     <p class="desc">
-  دليلك الشامل لفهم ومساعدة طفلك على تجاوز التحديات التعليمية.قمنا بتجميع اهم المعلومات
-  <br> 
-   حول ثلاث صعوبات رئيسية لمساعدتك في رحلة الدعم.
-</p>
-  </div>
-
-  <div class="cards-wrapper">
-    <div class="card" *ngFor="let item of difficulties" [ngClass]="item.theme">
-      
-      <div class="col-main">
-  <div class="icon-circle"><i class="fa-solid" [ngClass]="item.icon"></i></div>
-  <div class="title-group">
-    <h2>{{ item.title }}</h2>
-    <span class="latin-name">{{ item.latin }}</span>
-  </div>
-        <div class="image-container">
-    <img [src]="item.imagePath" alt="صورة">
-  </div>
-</div>
-      
-
-      <div class="col-details">
-        <div class="info-group">
-          
-          <h4 class="section-title question-icon">
-    <i class="fa-regular fa-circle-question"></i> ما هي؟
-</h4>
-          
-          <p class="description-text" [innerHTML]="item.desc"></p>
+    <div class="learning-topbar flex items-center justify-between w-full h-16 px-5 lg:px-8 relative" dir="ltr">
+        <div class="flex items-center gap-3 shrink-0">
+            <button pButton pRipple icon="pi pi-users" class="text-2xl" [rounded]="true" navigateTo="/auth/login"
+                (click)="menu?.toggle($event)"></button>
+            <button type="button" class="header-back-inline" (click)="goBack()">
+                <span>رجوع</span>
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <p-menu #menu [model]="items" [popup]="true" styleClass="rounded-xl shadow-lg"></p-menu>
         </div>
-        
-            <div class="training-box">
-                    <h4><i class="fa-solid fa-dumbbell"></i> التدريبات المقترحة؟</h4>
-          <div class="top-trainings">
-            <span *ngFor="let training of item.trainings">{{ training }}</span>
-          </div>
 
-          <div class="view-all-container">
-            <button class="view-all">عرض كل التمارين</button>
-          </div>
+        <div class="absolute left-1/2 -translate-x-1/2">
+            <ul class="list-none p-0 m-0 flex items-center select-none gap-8">
+                <li>
+                    <a (click)="router.navigate(['/training'])" pRipple
+                        class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
+                        التدريبات
+                    </a>
+                </li>
+                <li>
+                    <a (click)="router.navigate(['/history'])" pRipple
+                        class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
+                        النتائج
+                    </a>
+                </li>
+                <li>
+                    <a (click)="router.navigate(['/dashboard'])" pRipple
+                        class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
+                        التقييم
+                    </a>
+                </li>
+                <li>
+                    <a (click)="router.navigate(['/learning-difficulties'])" pRipple
+                        class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
+                        التعرف على صعوبات التعلم
+                    </a>
+                </li>
+            </ul>
         </div>
-      </div>
 
-      <div class="col-symptoms">
-        <div class="info-group">
-          <h4 class="section-title symptoms-icon">
-    <i class="fa-solid fa-stethoscope"></i> الأعراض الشائعة؟
-</h4>
-          <ul>
-            <li *ngFor="let symptom of item.symptoms">{{ symptom }}</li>
-          </ul>
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">بوصلة</span>
+            <div class="h-14 w-14 rounded-full flex items-center justify-center">
+                <img src="assets/images/app-logo.png" alt="compass" class="h-10 w-10">
+            </div>
         </div>
-        
-        <div class="parent-guide">
-        <h4 class="section-title guide-icon">
-    <i class="fa-regular fa-star"></i> دليل الأهل؟
-</h4>
-          <p [innerHTML]="item.parentTip"></p>
-          <a class="more-link">اقرأ المزيد  ←</a>
-        </div>
-      </div>
-
     </div>
-  </div>
-</div>
 
+    <main class="learning-main">
+        <section class="learning-intro">
+            <div class="intro-pill">
+                <i class="fa-regular fa-circle-question"></i>
+                <span>دليل التشخيص</span>
+            </div>
+            <h1>التعرف على الصعوبات</h1>
+            <p>
+                بدليلك الشامل، نفهم ونساعد طفلك على تجاوز التحديات التعليمية، قمنا بتجميع أهم المعلومات حول ثلاث
+                صعوبات رئيسية لمساعدتك في رحلة الدعم.
+            </p>
+        </section>
+
+        <section class="difficulty-list">
+            <article class="difficulty-card" *ngFor="let item of difficulties" [ngClass]="'difficulty-card--' + item.theme">
+                <div class="difficulty-card__media">
+                    <img [src]="item.imagePath" [alt]="item.title" />
+                </div>
+
+                <div class="difficulty-card__body">
+                    <header class="difficulty-card__head">
+                        <div class="difficulty-card__title">
+                            <h2>{{ item.title }}</h2>
+                            <span>{{ item.latin }}</span>
+                        </div>
+                        <div class="difficulty-card__icon">
+                            <i class="fa-solid" [ngClass]="item.icon"></i>
+                        </div>
+                    </header>
+
+                    <p class="difficulty-card__description">{{ item.description }}</p>
+
+                    <div class="difficulty-card__grid">
+                        <section class="info-box info-box--symptoms">
+                            <h3><i class="fa-regular fa-circle-question"></i> ما هي الأعراض الشائعة؟</h3>
+                            <ul class="list-disc pr-5">
+                                <li *ngFor="let symptom of item.symptoms" class="mb-2">{{ symptom }}</li>
+                            </ul>
+                        </section>
+
+                        <section class="info-box info-box--training">
+                            <h3><i class="fa-solid fa-person-running"></i> التدريبات المقترحة؟</h3>
+                            <div class="training-list">
+                                <span *ngFor="let training of item.trainings">{{ training }}</span>
+                            </div>
+                        </section>
+                    </div>
+
+                    <section class="info-box info-box--guide">
+                        <h3 class="mb-1"><i class="fa-regular fa-bookmark"></i> دليل الأهل؟</h3>
+                        <p>{{ item.guide }}</p>
+                        <button type="button" class="more-link">
+                            اقرأ المزيد <i class="fa-solid fa-arrow-left mr-2"></i>
+                        </button>
+                    </section>
+                </div>
+            </article>
+        </section>
+    </main>
+</div>

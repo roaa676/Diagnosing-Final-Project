@@ -1,26 +1,7 @@
 <div class="profile-page" dir="rtl">
-    <header class="profile-topbar">
-        <div class="profile-brand">
-            <p-avatar icon="pi pi-compass" styleClass="profile-brand__icon"></p-avatar>
-            <span class="profile-brand__title">بوصلة</span>
-        </div>
-
-        <button
-            pButton
-            type="button"
-            label="رجوع"
-            icon="pi pi-arrow-left"
-            iconPos="right"
-            [text]="true"
-            severity="success"
-            class="header-back-action"
-            routerLink="/dashboard"
-        ></button>
-    </header>
-
     <section class="profile-hero">
         <h1>إعدادات الحساب</h1>
-        <p>إدارة بياناتك الشخصية، وأطفالك، وتفضيلات التطبيق.</p>
+        <p>إدارة بياناتك الشخصية، أطفالك، وتفضيلات التطبيق.</p>
     </section>
 
     <main class="profile-layout">
@@ -40,7 +21,7 @@
         </aside>
 
         <section class="profile-content">
-            <article id="personal-info" class="profile-card profile-card--personal">
+            <article *ngIf="activeSection === 'personal-info'" class="profile-card profile-card--personal">
                 <div class="profile-card__head">
                     <div class="profile-card__title-wrap">
                         <p-avatar icon="pi pi-user" styleClass="section-icon section-icon--green"></p-avatar>
@@ -76,12 +57,20 @@
                     </div>
 
                     <div class="profile-form__actions">
-                        <button pButton type="button" label="حفظ التغييرات" icon="pi pi-save" iconPos="right" class="profile-save-button" (click)="saveProfile()"></button>
+                        <button
+                            pButton
+                            type="button"
+                            label="حفظ التغييرات"
+                            icon="pi pi-save"
+                            iconPos="right"
+                            class="profile-save-button"
+                            (click)="saveProfile()"
+                        ></button>
                     </div>
                 </form>
             </article>
 
-            <article id="children" class="profile-card profile-card--children">
+            <article *ngIf="activeSection === 'children'" class="profile-card profile-card--children">
                 <div class="profile-card__head profile-card__head--split">
                     <div class="profile-card__title-wrap">
                         <p-avatar icon="pi pi-users" styleClass="section-icon section-icon--purple"></p-avatar>
@@ -90,34 +79,42 @@
                         </div>
                     </div>
 
-                    <button pButton type="button" label="إضافة طفل جديد" icon="pi pi-plus" iconPos="right" class="profile-add-button" (click)="addChild()"></button>
+                    <button
+                        pButton
+                        type="button"
+                        label="إضافة طفل جديد"
+                        icon="pi pi-user-plus"
+                        iconPos="right"
+                        class="profile-add-button"
+                        (click)="addChild()"
+                    ></button>
                 </div>
 
-                <div class="children-grid">
-                    <article class="child-card" *ngFor="let child of childProfiles; trackBy: trackByChild">
-                        <div class="child-card__content">
-                            <p-avatar [image]="child.avatar" styleClass="child-avatar"></p-avatar>
-                            <div class="child-card__copy">
+                <div class="children-list">
+                    <article class="child-row" *ngFor="let child of childProfiles; trackBy: trackByChild">
+                        <button pButton type="button" icon="pi pi-pencil" class="child-edit-button" (click)="editChild(child)"></button>
+
+                        <div class="child-row__content">
+                            <div class="child-row__copy">
                                 <h3>{{ child.name }}</h3>
                                 <span>{{ child.details }}</span>
                             </div>
+                            <p-avatar [image]="child.avatar" styleClass="child-avatar"></p-avatar>
                         </div>
-
-                        <button pButton type="button" icon="pi pi-pencil" class="child-edit-button" (click)="editChild(child)"></button>
                     </article>
-
-                    <button pButton type="button" icon="pi pi-plus" label="تسجيل طفل جديد" iconPos="right" class="child-card child-card--add" (click)="addChild()"></button>
                 </div>
+
+                <button pButton type="button" icon="pi pi-plus" label="تسجيل طفل جديد" iconPos="right" class="child-add-row" (click)="addChild()"></button>
             </article>
 
-            <div class="bottom-grid">
-                <article id="support" class="profile-card profile-card--support">
+            <div *ngIf="activeSection === 'support'" class="support-layout">
+                <article class="profile-card profile-card--support">
                     <div class="profile-card__head">
                         <div class="profile-card__title-wrap">
-                            <p-avatar icon="pi pi-question-circle" styleClass="section-icon section-icon--blue"></p-avatar>
+                            <p-avatar icon="pi pi-headphones" styleClass="section-icon section-icon--blue"></p-avatar>
                             <div class="profile-card__title-copy">
                                 <h2>الدعم والمساعدة</h2>
-                                <p>هل تريد معرفة المزيد؟ نحن هنا لمساعدتك في أي وقت.</p>
+                                <p>هل تواجه مشكلة؟ فريق الدعم جاهز لمساعدتك في أي وقت.</p>
                             </div>
                         </div>
                     </div>
@@ -136,13 +133,13 @@
                     </div>
                 </article>
 
-                <article id="logout" class="profile-card profile-card--logout">
+                <article class="profile-card profile-card--logout">
                     <div class="profile-card__head">
                         <div class="profile-card__title-wrap">
                             <p-avatar icon="pi pi-sign-out" styleClass="section-icon section-icon--red"></p-avatar>
                             <div class="profile-card__title-copy">
                                 <h2>تسجيل الخروج</h2>
-                                <p>سيتم نقلك إلى شاشة تسجيل الخروج، ويمكنك العودة في أي وقت.</p>
+                                <p>سيتم نقلك إلى شاشة تسجيل الدخول، ويمكنك العودة في أي وقت.</p>
                             </div>
                         </div>
                     </div>
@@ -150,6 +147,36 @@
                     <button pButton type="button" label="تسجيل الخروج من الحساب" class="logout-button" (click)="logout()"></button>
                 </article>
             </div>
+
+            <article *ngIf="activeSection === 'notifications'" class="profile-card profile-card--notifications">
+                <div class="profile-card__head">
+                    <div class="profile-card__title-wrap">
+                        <p-avatar icon="pi pi-bell" styleClass="section-icon section-icon--amber"></p-avatar>
+                        <div class="profile-card__title-copy">
+                            <h2>الإشعارات</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notification-list">
+                    <div class="notification-item" *ngFor="let item of notificationSettings; trackBy: trackByNotification">
+                        <button
+                            type="button"
+                            class="notification-switch"
+                            [class.notification-switch--on]="item.enabled"
+                            [attr.aria-pressed]="item.enabled"
+                            (click)="toggleNotification(item)"
+                        >
+                            <span></span>
+                        </button>
+
+                        <div class="notification-item__copy">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
         </section>
     </main>
 </div>

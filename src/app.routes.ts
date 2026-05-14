@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/core/shared/layout/app-layout';
 import { Dashboard } from '@/pages/Dashboard/dashboard';
-import { LearningDifficultiesComponent } from './app/pages/Learning-difficulties/Learning-difficulties';
 import { TrainingComponent } from '@/pages/Training/training';
 import { TrainingLevelsComponent } from '@/pages/Training/Training-Levels/training-levels';
+import { HistoryComponent } from './app/pages/history/history.component';
+import { ProfileComponent } from '@/pages/profile/profile.component';
+import { LearningDifficultiesComponent } from '@/pages/Learning-difficulties/Learning-difficulties';
 
 
 
@@ -23,5 +25,7 @@ export const appRoutes: Routes = [
     { path: 'learning-difficulties', component: LearningDifficultiesComponent },
     { path: 'training/levels', component: TrainingLevelsComponent },
     { path: 'training', component: TrainingComponent },
+    { path: 'history', component: HistoryComponent },
+    { path: 'profile', component: ProfileComponent },
     { path: '**', redirectTo: '/dashboard' }
 ];

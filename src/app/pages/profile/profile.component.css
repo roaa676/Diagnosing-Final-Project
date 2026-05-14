@@ -2,263 +2,173 @@
     display: block;
     min-height: 100vh;
     direction: rtl;
-    background:
-        radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), transparent 24rem),
-        linear-gradient(180deg, #ffffff 0%, #ffffff 4.25rem, #f5f8f6 4.25rem, #f5f8f6 100%);
+    background: #f3f5f7;
     color: #0f172a;
 }
 
 .profile-page {
-    min-height: 100vh;
-}
-
-.profile-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    background: #ffffff;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.profile-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-}
-
-.profile-brand__title {
-    font-size: 1.04rem;
-    font-weight: 800;
-    color: #0f172a;
-}
-
-:host ::ng-deep .profile-brand__icon.p-avatar {
-    width: 2.55rem;
-    height: 2.55rem;
-    background: #22c55e;
-    border: none;
-    color: #ffffff;
-    box-shadow: 0 8px 18px rgba(34, 197, 94, 0.22);
-}
-
-:host ::ng-deep .profile-brand__icon .p-avatar-icon {
-    font-size: 1rem;
-}
-
-.profile-back-button.p-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    border: 0;
-    border-radius: 999px;
-    padding: 0.68rem 1.1rem;
-    background: #f3f5f7;
-    color: #334155;
-    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02), 0 6px 18px rgba(15, 23, 42, 0.04);
-    font-size: 0.92rem;
-    font-weight: 700;
-}
-
-.profile-back-button.p-button:hover {
-    background: #e9eef3;
-    color: #0f172a;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 3.2rem 1.5rem 3rem;
 }
 
 .profile-hero {
-    max-width: 1440px;
-    margin: 1.05rem auto 1rem;
-    padding: 0 1.5rem;
-    text-align: right;
+    margin: 0 auto 1.8rem;
+    text-align: center;
 }
 
 .profile-hero h1 {
-    margin: 0 0 0.35rem;
-    font-size: 1.55rem;
-    line-height: 1.2;
+    margin: 0 0 0.4rem;
+    font-size: 3rem;
+    line-height: 1.1;
     font-weight: 800;
     color: #0f172a;
 }
 
 .profile-hero p {
     margin: 0;
-    color: #8ea39a;
-    font-size: 0.95rem;
-    font-weight: 600;
+    color: #6b7a90;
+    font-size: 1.5rem;
+    font-weight: 500;
 }
 
 .profile-layout {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 0 1.5rem 2rem;
     display: grid;
-    grid-template-columns: 250px minmax(0, 1fr);
-    gap: 1.25rem;
+    grid-template-columns: 290px minmax(0, 1fr);
+    gap: 1.6rem;
     align-items: start;
 }
 
 .profile-sidebar {
     position: sticky;
-    top: 6rem;
+    top: 2rem;
 }
 
 .profile-nav {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
+    gap: 0.85rem;
 }
 
 .profile-nav__button.p-button {
     width: 100%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
     border: 1px solid transparent;
     border-radius: 1rem;
-    padding: 0.82rem 0.95rem;
+    padding: 0.95rem 1rem;
     background: transparent;
-    color: #78918b;
+    color: #334155;
+    font-size: 1.45rem;
+    font-weight: 500;
     box-shadow: none;
-    font-size: 0.88rem;
-    font-weight: 700;
-}
-
-:host ::ng-deep .profile-nav__button .p-button-icon {
-    order: 2;
-    margin-inline-start: 0;
-    width: 2rem;
-    height: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.7rem;
-    background: #eef4ef;
-    color: #7f998f;
-    font-size: 0.9rem;
 }
 
 :host ::ng-deep .profile-nav__button .p-button-label {
-    flex: 1;
     text-align: right;
 }
 
+:host ::ng-deep .profile-nav__button .p-button-icon {
+    margin: 0 0 0 0.65rem;
+    width: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #334155;
+}
+
 .profile-nav__button--active.p-button {
-    background: #eafaf0;
-    color: #22c55e;
-    box-shadow: 0 10px 20px rgba(34, 197, 94, 0.09);
+    background: #dff1e8;
+    color: #15803d;
 }
 
 :host ::ng-deep .profile-nav__button--active .p-button-icon {
-    background: #22c55e;
-    color: #ffffff;
-}
-
-:host ::ng-deep .profile-nav__button--green .p-button-icon {
-    color: #22c55e;
-}
-
-:host ::ng-deep .profile-nav__button--purple .p-button-icon {
-    color: #8b5cf6;
-}
-
-:host ::ng-deep .profile-nav__button--blue .p-button-icon {
-    color: #3b82f6;
-}
-
-:host ::ng-deep .profile-nav__button--gray .p-button-icon {
-    color: #64748b;
+    color: #15803d;
 }
 
 .profile-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.15rem;
     min-width: 0;
 }
 
 .profile-card {
-    padding: 1.25rem 1.25rem 1.15rem;
+    border: 1px solid #e4e8ee;
+    border-radius: 1.3rem;
     background: #ffffff;
-    border: 1px solid rgba(226, 232, 240, 0.92);
-    border-radius: 1.6rem;
-    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    padding: 1.45rem;
 }
 
 .profile-card__head {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
 }
 
 .profile-card__head--split {
-    align-items: center;
+    align-items: flex-start;
+    gap: 1rem;
 }
 
 .profile-card__title-wrap {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
+    gap: 0.72rem;
 }
 
 .profile-card__title-copy {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
     text-align: right;
-    gap: 0.2rem;
 }
 
 .profile-card__title-copy h2 {
     margin: 0;
-    font-size: 1.15rem;
-    line-height: 1.25;
+    font-size: 2.45rem;
     font-weight: 800;
     color: #0f172a;
 }
 
 .profile-card__title-copy p {
-    margin: 0;
-    color: #8fa3a0;
-    font-size: 0.85rem;
-    font-weight: 600;
+    margin: 0.45rem 0 0;
+    font-size: 1.28rem;
+    line-height: 1.55;
+    color: #6b7a90;
 }
 
 :host ::ng-deep .section-icon.p-avatar {
-    width: 2.55rem;
-    height: 2.55rem;
+    width: 2.45rem;
+    height: 2.45rem;
     border: none;
 }
 
 :host ::ng-deep .section-icon .p-avatar-icon {
-    font-size: 0.98rem;
+    font-size: 1.1rem;
 }
 
 .section-icon--green {
-    background: #eafaf0;
-    color: #22c55e;
+    background: #dff5e8;
+    color: #16a34a;
 }
 
 .section-icon--purple {
-    background: #f4ecff;
-    color: #8b5cf6;
+    background: #ece9ff;
+    color: #7c3aed;
 }
 
 .section-icon--blue {
-    background: #eaf1ff;
-    color: #3b82f6;
+    background: #e3edff;
+    color: #2563eb;
 }
 
 .section-icon--red {
-    background: #fde9ea;
+    background: #fde8ea;
     color: #ef4444;
+}
+
+.section-icon--amber {
+    background: #fdf0c9;
+    color: #d97706;
+}
+
+.profile-card--personal,
+.profile-card--children,
+.profile-card--notifications {
+    min-height: 26rem;
 }
 
 .profile-form {
@@ -270,13 +180,13 @@
 .profile-form__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.95rem;
+    gap: 0.85rem;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 0.35rem;
 }
 
 .field--full {
@@ -284,9 +194,45 @@
 }
 
 .field label {
-    color: #334155;
-    font-size: 0.82rem;
-    font-weight: 700;
+    font-size: 1.26rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+:host ::ng-deep .profile-input,
+:host ::ng-deep .profile-password .p-inputtext {
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid #d7dde5;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 1.38rem;
+    padding: 0.75rem 1rem;
+    box-shadow: none;
+}
+
+:host ::ng-deep .profile-password {
+    width: 100%;
+}
+
+:host ::ng-deep .profile-password .p-icon-field {
+    width: 100%;
+}
+
+:host ::ng-deep .profile-password .p-inputtext {
+    padding-inline-end: 2.5rem;
+}
+
+:host ::ng-deep .profile-password .p-icon-field-icon {
+    inset-inline-start: 0.9rem;
+    inset-inline-end: auto;
+    color: #94a3b8;
+}
+
+:host ::ng-deep .profile-input:focus,
+:host ::ng-deep .profile-password .p-inputtext:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 0.18rem rgba(34, 197, 94, 0.15);
 }
 
 .profile-form__actions {
@@ -296,124 +242,107 @@
 
 .profile-save-button.p-button,
 .profile-add-button.p-button,
+.child-edit-button.p-button,
+.child-add-row.p-button,
 .support-action.p-button,
-.logout-button.p-button,
-.child-edit-button.p-button {
+.logout-button.p-button {
     border: 0;
     box-shadow: none;
 }
 
 .profile-save-button.p-button {
-    min-width: 9.5rem;
+    min-width: 11.4rem;
     border-radius: 0.95rem;
-    padding: 0.8rem 1rem;
-    background: linear-gradient(180deg, #34d399 0%, #22c55e 100%);
+    padding: 0.74rem 1.05rem;
+    background: #22c55e;
     color: #ffffff;
-    font-weight: 800;
-}
-
-.profile-add-button.p-button {
-    border-radius: 0.95rem;
-    padding: 0.65rem 0.9rem;
-    background: #ecfdf3;
-    color: #22c55e;
-    font-weight: 800;
-}
-
-.children-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.9rem;
-}
-
-.child-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.85rem;
-    min-height: 5rem;
-    padding: 0.9rem 1rem;
-    background: #ffffff;
-    border: 1px solid #e5edf0;
-    border-radius: 1.05rem;
-}
-
-.child-card__content {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    min-width: 0;
-}
-
-:host ::ng-deep .child-avatar.p-avatar {
-    width: 3rem;
-    height: 3rem;
-    border: none;
-    overflow: hidden;
-    background: #f8fafc;
-}
-
-:host ::ng-deep .child-avatar img {
-    object-fit: cover;
-}
-
-.child-card__copy {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.2rem;
-    text-align: right;
-}
-
-.child-card__copy h3 {
-    margin: 0;
-    font-size: 0.98rem;
-    font-weight: 800;
-    color: #0f172a;
-}
-
-.child-card__copy span {
-    color: #8ea39a;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.child-edit-button.p-button {
-    width: 2.15rem;
-    height: 2.15rem;
-    border-radius: 0.8rem;
-    background: #f5fbf7;
-    color: #22c55e;
-}
-
-.child-card--add.p-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    min-height: 5rem;
-    border-radius: 1.05rem;
-    border: 1px dashed #d7e7da;
-    background: #fbfdfb;
-    color: #5fa879;
+    font-size: 1.3rem;
     font-weight: 700;
 }
 
-:host ::ng-deep .child-card--add .p-button-icon {
-    font-size: 1.25rem;
+.profile-add-button.p-button {
+    border-radius: 0.85rem;
+    padding: 0.5rem 0.85rem;
+    background: #dff5e8;
+    color: #16a34a;
+    font-size: 1.2rem;
+    font-weight: 600;
 }
 
-.bottom-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.95rem;
-}
-
-.profile-card--support {
+.children-list {
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
+    gap: 0.8rem;
+}
+
+.child-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e5eaf0;
+    border-radius: 1rem;
+    background: #f8fafc;
+}
+
+.child-row__content {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.child-row__copy {
+    text-align: right;
+}
+
+.child-row__copy h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.child-row__copy span {
+    font-size: 1.25rem;
+    color: #64748b;
+}
+
+:host ::ng-deep .child-avatar.p-avatar {
+    width: 2.9rem;
+    height: 2.9rem;
+    border: none;
+}
+
+.child-edit-button.p-button {
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 0.8rem;
+    background: #ffffff;
+    color: #64748b;
+    border: 1px solid #d6dde6;
+}
+
+.child-add-row.p-button {
+    margin-top: 1rem;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px dashed #cfd8e3;
+    background: transparent;
+    color: #64748b;
+    font-size: 1.35rem;
+    font-weight: 500;
+    padding: 0.8rem 1rem;
+}
+
+.support-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.profile-card--support,
+.profile-card--logout {
+    min-height: 22rem;
 }
 
 .support-list {
@@ -424,134 +353,148 @@
 
 .support-action.p-button {
     width: 100%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.8rem;
     border-radius: 0.95rem;
-    padding: 0.85rem 0.95rem;
-    background: #f8fbff;
-    color: #5f78a7;
-    font-weight: 700;
-}
-
-:host ::ng-deep .support-action .p-button-icon {
-    order: 2;
-    width: 2rem;
-    height: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.7rem;
-    background: #eef4ff;
-    color: #3b82f6;
-}
-
-:host ::ng-deep .support-action .p-button-label {
-    flex: 1;
-    text-align: right;
-}
-
-.profile-card--logout {
-    display: flex;
-    flex-direction: column;
-    gap: 0.95rem;
+    border: 1px solid #d8e1ea;
+    background: #f8fafc;
+    color: #1e3a5f;
+    font-size: 1.28rem;
+    font-weight: 500;
+    padding: 0.72rem 0.95rem;
 }
 
 .logout-button.p-button {
     width: 100%;
+    margin-top: auto;
     border-radius: 0.95rem;
-    padding: 0.9rem 1rem;
-    background: #fbeaec;
+    background: #fdeced;
     color: #ef4444;
-    font-weight: 800;
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding: 0.78rem 1rem;
 }
 
-:host ::ng-deep .profile-password {
-    width: 100%;
+.profile-card--notifications {
+    display: flex;
+    flex-direction: column;
 }
 
-:host ::ng-deep .profile-input,
-:host ::ng-deep .profile-password .p-inputtext {
-    width: 100%;
-    border-radius: 0.9rem;
-    border: 1px solid #e2e8f0;
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #e6ebf1;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem 0.2rem;
+}
+
+.notification-item + .notification-item {
+    border-top: 1px solid #e6ebf1;
+}
+
+.notification-item__copy {
+    text-align: right;
+}
+
+.notification-item__copy h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.notification-item__copy p {
+    margin: 0.35rem 0 0;
+    color: #64748b;
+    font-size: 1.2rem;
+    line-height: 1.45;
+}
+
+.notification-switch {
+    width: 3.55rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 999px;
+    background: #cbd5e1;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.notification-switch span {
+    position: absolute;
+    top: 0.25rem;
+    left: 0.3rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
     background: #ffffff;
-    color: #0f172a;
-    padding: 0.8rem 0.95rem;
-    box-shadow: none;
+    transition: transform 0.2s ease;
 }
 
-:host ::ng-deep .profile-input:focus,
-:host ::ng-deep .profile-password .p-inputtext:focus {
-    border-color: #22c55e;
-    box-shadow: 0 0 0 0.18rem rgba(34, 197, 94, 0.12);
+.notification-switch--on {
+    background: #22c55e;
 }
 
-:host ::ng-deep .profile-password .p-inputtext {
-    padding-inline-start: 0.95rem;
-    padding-inline-end: 2.75rem;
+.notification-switch--on span {
+    transform: translateX(1.5rem);
 }
 
-:host ::ng-deep .profile-password .p-icon-field {
-    width: 100%;
-}
-
-@media (max-width: 1279px) {
+@media (max-width: 1150px) {
     .profile-layout {
         grid-template-columns: minmax(0, 1fr);
     }
 
     .profile-sidebar {
         position: static;
-        order: 1;
     }
 
-    .profile-content {
-        order: 2;
-    }
-}
-
-@media (max-width: 1023px) {
-    .profile-form__grid,
-    .children-grid,
-    .bottom-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-card__head {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .profile-card__head--split {
-        align-items: stretch;
-    }
-
-    .profile-card__title-wrap {
-        justify-content: space-between;
+    .profile-nav {
+        max-width: 420px;
+        margin: 0 auto;
     }
 }
 
-@media (max-width: 767px) {
-    .profile-topbar,
-    .profile-hero,
-    .profile-layout {
-        padding-inline: 1rem;
-    }
-
-    .profile-topbar {
-        padding-block: 0.85rem;
-        flex-wrap: wrap;
+@media (max-width: 920px) {
+    .profile-page {
+        padding: 2rem 1rem;
     }
 
     .profile-hero h1 {
-        font-size: 1.35rem;
+        font-size: 2.2rem;
     }
 
-    .profile-card,
-    .child-card,
-    .profile-nav__button.p-button {
-        border-radius: 1.1rem;
+    .profile-hero p {
+        font-size: 1rem;
+    }
+
+    .profile-form__grid,
+    .support-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card__title-copy h2 {
+        font-size: 1.45rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-nav__button.p-button,
+    .field label,
+    .profile-add-button.p-button,
+    .child-row__copy h3,
+    .child-row__copy span,
+    .support-action.p-button,
+    .notification-item__copy h3,
+    .notification-item__copy p {
+        font-size: 0.95rem;
+    }
+
+    :host ::ng-deep .profile-input,
+    :host ::ng-deep .profile-password .p-inputtext {
+        font-size: 0.95rem;
     }
 }
