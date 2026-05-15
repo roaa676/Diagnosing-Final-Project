@@ -21,7 +21,7 @@ export interface ExerciseResponse {
 
 @Injectable({ providedIn: 'root' })
 export class ChatbotService {
-  private apiUrl = 'http://127.0.0.1:8080/api';
+  private apiUrl = 'http://127.0.0.1:8000/api';
 
   constructor(private http: HttpClient) {}
 

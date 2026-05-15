@@ -26,7 +26,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://127.0.0.1:8080/api';
+  private apiUrl = 'http://127.0.0.1:8000/api';
   private isLoggedIn = new BehaviorSubject<boolean>(!!localStorage.getItem('auth_token'));
   public isLoggedIn$ = this.isLoggedIn.asObservable();
 
