@@ -1,0 +1,107 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "platform": "Bowsla / بوصلة",
+    "description": "قواعد تفسير الدرجات وتصنيفها إلى مستويات صعوبة مع توصيات المستوى التدريبي",
+    "note": "هذه المقاييس مؤشرات أولية وليست تشخيصات طبية نهائية"
+  },
+
+  "score_bands": [
+    {
+      "id": "high_difficulty_indicator",
+      "range": { "min": 0, "max": 49 },
+      "arabic_label": "مؤشر صعوبة مرتفع",
+      "english_label": "High Difficulty Indicator",
+      "severity": "high",
+      "color_code": "#E74C3C",
+      "chatbot_message": "تظهر نتيجة الطفل مؤشرات تستدعي الانتباه في هذه المهارة. الطفل قد يستفيد كثيرًا من تمارين المستوى الأول المركّزة.",
+      "recommended_training_level": 1,
+      "parent_guidance": "ننصح بممارسة تمارين المستوى الأول بانتظام (10-15 دقيقة يوميًا). إذا لم يتحسن الأداء خلال 4-6 أسابيع، يُفضّل استشارة متخصص.",
+      "specialist_referral_recommended": true,
+      "disclaimer": "هذه نتيجة مبدئية مبنية على أداء الطفل داخل المنصة، وليست تشخيصًا طبيًا نهائيًا."
+    },
+    {
+      "id": "moderate_difficulty_indicator",
+      "range": { "min": 50, "max": 69 },
+      "arabic_label": "مؤشر صعوبة متوسط",
+      "english_label": "Moderate Difficulty Indicator",
+      "severity": "moderate",
+      "color_code": "#F39C12",
+      "chatbot_message": "يُظهر الطفل بعض الصعوبة في هذه المهارة، لكن لديه أساس جيد يمكن البناء عليه. التمارين المنتظمة ستُحسّن الأداء بشكل ملحوظ.",
+      "recommended_training_level": 2,
+      "parent_guidance": "ننصح بتمارين المستوى الثاني مع متابعة الأداء بانتظام. الممارسة اليومية المنتظمة كافية في الغالب.",
+      "specialist_referral_recommended": false,
+      "disclaimer": "هذه نتيجة مبدئية مبنية على أداء الطفل داخل المنصة، وليست تشخيصًا طبيًا نهائيًا."
+    },
+    {
+      "id": "good_performance",
+      "range": { "min": 70, "max": 100 },
+      "arabic_label": "أداء جيد / لا توجد مؤشرات واضحة",
+      "english_label": "Good Performance",
+      "severity": "low",
+      "color_code": "#27AE60",
+      "chatbot_message": "يُبلي الطفل بلاءً حسنًا في هذه المهارة. ننصح بالاستمرار في التمارين للحفاظ على هذا المستوى وتطويره.",
+      "recommended_training_level": 3,
+      "parent_guidance": "يواصل الطفل تمارين المستوى الثالث للحفاظ على مستوى الأداء وتعزيزه.",
+      "specialist_referral_recommended": false,
+      "disclaimer": "هذه نتيجة مبدئية مبنية على أداء الطفل داخل المنصة، وليست تشخيصًا طبيًا نهائيًا."
+    }
+  ],
+
+  "overall_severity_mapping": {
+    "high": {
+      "arabic_label": "مؤشر صعوبة مرتفع إجمالي",
+      "action": "يحتاج الطفل إلى دعم تدريبي مكثف في المهارات المتأثرة. يُنصح بمتابعة منتظمة واستشارة متخصص إذا استمرت الصعوبات.",
+      "training_priority": "urgent"
+    },
+    "moderate": {
+      "arabic_label": "مؤشر صعوبة متوسط إجمالي",
+      "action": "الطفل يحتاج إلى دعم إضافي في بعض المهارات. التمارين المنتظمة ستُحدث فرقًا واضحًا.",
+      "training_priority": "recommended"
+    },
+    "low": {
+      "arabic_label": "أداء جيد إجمالي",
+      "action": "الطفل يُؤدّي بشكل جيد. المتابعة المنتظمة كافية للحفاظ على المستوى.",
+      "training_priority": "maintenance"
+    }
+  },
+
+  "score_to_training_level": {
+    "description": "تحويل الدرجة إلى مستوى التدريب الموصى به",
+    "mapping": [
+      { "score_range": [0, 49], "training_level": 1, "label": "تدريب مكثف — المستوى الأول" },
+      { "score_range": [50, 69], "training_level": 2, "label": "تدريب تعزيزي — المستوى الثاني" },
+      { "score_range": [70, 100], "training_level": 3, "label": "صيانة وتطوير — المستوى الثالث" }
+    ]
+  },
+
+  "z_score_to_chatbot_severity": {
+    "description": "تحويل Z-Score (من نظام الألعاب) إلى تصنيف الشدة للتشاتبوت",
+    "mapping": [
+      { "z_score_range": [null, -1.5], "severity": "high", "band_id": "high_difficulty_indicator" },
+      { "z_score_range": [-1.5, -0.5], "severity": "moderate", "band_id": "moderate_difficulty_indicator" },
+      { "z_score_range": [-0.5, null], "severity": "low", "band_id": "good_performance" }
+    ]
+  },
+
+  "risk_level_to_chatbot_severity": {
+    "description": "تحويل risk_level (من نظام GameResult) إلى تصنيف الشدة للتشاتبوت",
+    "mapping": {
+      "High Risk": "high",
+      "Moderate Risk": "moderate",
+      "Normal": "low",
+      "No Risk": "low",
+      "No Norm Data": "unknown"
+    }
+  },
+
+  "mandatory_disclaimer": "هذه نتيجة مبدئية مبنية على أداء الطفل داخل المنصة، وليست تشخيصًا طبيًا نهائيًا.",
+
+  "specialist_referral_triggers": [
+    "درجة الطفل أقل من 50 في مهارة واحدة أو أكثر",
+    "استمرار نفس الصعوبة في أكثر من جلسة",
+    "تأثير الصعوبة على أداء الطفل المدرسي اليومي",
+    "تكرار نفس الأخطاء رغم التمارين المنتظمة",
+    "طلب ولي الأمر صراحةً رأيًا في الذهاب لطبيب"
+  ]
+}

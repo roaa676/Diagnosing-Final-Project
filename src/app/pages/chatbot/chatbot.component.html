@@ -1,0 +1,95 @@
+<!-- Floating bubble -->
+<button class="chat-bubble" (click)="toggleChat()" [class.active]="isOpen" title="مساعد بوصلة">
+  <i class="pi" [class.pi-comments]="!isOpen" [class.pi-times]="isOpen"></i>
+</button>
+
+<!-- Chat panel -->
+<div class="chat-panel" [class.open]="isOpen" dir="rtl">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">🧭</div>
+      <div>
+        <div class="chat-title">مساعد بوصلة</div>
+        <div class="chat-subtitle">متاح دائماً للإجابة على أسئلتك</div>
+      </div>
+    </div>
+    <div class="chat-header-actions">
+      <!-- Reset button — always visible when there are messages -->
+      <button
+        *ngIf="messages.length > 0"
+        class="header-btn reset-btn"
+        (click)="resetChat()"
+        title="ابدأ محادثة جديدة"
+      >
+        <i class="pi pi-refresh"></i>
+      </button>
+      <button class="header-btn close-btn" (click)="toggleChat()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Welcome screen (no messages yet) -->
+  <div class="welcome-screen" *ngIf="messages.length === 0">
+    <div class="welcome-msg">
+      أهلاً! أنا مساعد بوصلة 🧭<br>
+      اسألني عن نتائج طفلك، التمارين المناسبة، أو أي شيء عن صعوبات التعلم.
+    </div>
+    <div class="examples-label">أمثلة على أسئلة تقدر تسألها:</div>
+    <div class="quick-actions">
+      <button class="quick-btn" (click)="quickAsk('يعني إيه عسر القراءة؟')">🔤 يعني إيه عسر القراءة؟</button>
+      <button class="quick-btn" (click)="quickAsk('ازاي اعرف ان ابني عنده صعوبة تعلم؟')">🔍 ازاي اعرف ان ابني عنده صعوبة؟</button>
+      <button class="quick-btn" (click)="quickAsk('أعمل إيه في البيت عشان أساعده؟')">🏠 تمارين منزلية مناسبة</button>
+      <button class="quick-btn" (click)="quickAsk('هل ابني محتاج دكتور؟')">👨‍⚕️ هل يحتاج متخصص؟</button>
+      <button class="quick-btn" (click)="quickAsk('ايه الفرق بين عسر القراءة وعسر الحساب؟')">📚 الفرق بين صعوبات التعلم</button>
+      <button class="quick-btn" (click)="quickAsk('عسر النطق ايه هو؟')">🗣️ عسر النطق ايه هو؟</button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="chat-messages" #messagesContainer *ngIf="messages.length > 0">
+    <div *ngFor="let msg of messages"
+         class="msg-row"
+         [class.user]="msg.role === 'user'"
+         [class.assistant]="msg.role === 'assistant'">
+      <div class="msg-bubble"
+           [class.user-bubble]="msg.role === 'user'"
+           [class.assistant-bubble]="msg.role === 'assistant'">
+        <span [innerHTML]="formatText(msg.text)"></span>
+      </div>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="msg-row assistant" *ngIf="isLoading">
+      <div class="msg-bubble assistant-bubble typing">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suggested questions (during conversation) -->
+  <div class="suggestions-bar" *ngIf="messages.length > 0 && !isLoading">
+    <button class="sugg-btn" (click)="quickAsk('أعمل إيه في البيت؟')">تمارين منزلية</button>
+    <button class="sugg-btn" (click)="quickAsk('هل ابني محتاج متخصص؟')">متى أستشير متخصص؟</button>
+    <button class="sugg-btn" (click)="quickAsk('ايه علامات صعوبات التعلم؟')">علامات الصعوبة</button>
+  </div>
+
+  <!-- Input -->
+  <div class="chat-input-area">
+    <input
+      class="chat-input"
+      type="text"
+      [(ngModel)]="userInput"
+      (keydown.enter)="send()"
+      placeholder="اكتب سؤالك هنا..."
+      [disabled]="isLoading"
+      dir="rtl"
+    />
+    <button class="send-btn" (click)="send()" [disabled]="isLoading || !userInput.trim()">
+      <i class="pi pi-send"></i>
+    </button>
+  </div>
+
+</div>

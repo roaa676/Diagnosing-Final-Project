@@ -15,6 +15,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\ChatbotController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,5 +79,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/questions', [QuestionController::class, 'store']);
         Route::put('/questions/{id}', [QuestionController::class, 'update']);
         Route::delete('/questions/{id}', [QuestionController::class, 'destroy']);
+    });
+
+    // --- 8. مسارات المساعد الذكي (Chatbot) ---
+    Route::prefix('chatbot')->group(function () {
+        Route::post('/ask',                 [ChatbotController::class, 'ask']);
+        Route::post('/explain-result',      [ChatbotController::class, 'explainResult']);
+        Route::post('/recommend-exercises', [ChatbotController::class, 'recommendExercises']);
     });
 });

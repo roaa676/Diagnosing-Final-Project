@@ -4,7 +4,6 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AppFooter } from './Footer/app-footer';
 import { LayoutService } from '../../../layout/service/layout.service';
-
 @Component({
     selector: 'app-layout',
     standalone: true,

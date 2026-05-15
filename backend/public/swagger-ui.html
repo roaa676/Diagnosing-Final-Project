@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بوصلة — Chatbot API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui.css" />
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+
+    /* Arabic header banner */
+    #bowsla-header {
+      background: linear-gradient(135deg, #1a3c5e 0%, #2d7dd2 100%);
+      color: white;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      direction: rtl;
+    }
+    #bowsla-header .logo { font-size: 2rem; font-weight: 900; letter-spacing: 1px; }
+    #bowsla-header .subtitle { font-size: 0.95rem; opacity: 0.85; }
+    #bowsla-header .badge {
+      margin-right: auto;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+
+    /* Instruction box */
+    #instructions {
+      background: #f0f7ff;
+      border-right: 4px solid #2d7dd2;
+      margin: 16px 24px;
+      padding: 14px 20px;
+      border-radius: 6px;
+      direction: rtl;
+      font-size: 0.9rem;
+      color: #1a3c5e;
+    }
+    #instructions ol { margin: 8px 0 0 0; padding-right: 20px; }
+    #instructions li { margin-bottom: 6px; }
+    #instructions code {
+      background: #dbeafe;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      color: #1e40af;
+    }
+
+    /* Safety banner */
+    #safety-note {
+      background: #fef3c7;
+      border-right: 4px solid #d97706;
+      margin: 0 24px 16px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      direction: rtl;
+      font-size: 0.85rem;
+      color: #78350f;
+    }
+
+    /* Override Swagger UI direction for Arabic content */
+    .swagger-ui { direction: ltr; }
+    .swagger-ui .info { direction: rtl; }
+    .swagger-ui .info .title { direction: rtl; }
+  </style>
+</head>
+<body>
+
+<div id="bowsla-header">
+  <div>
+    <div class="logo">🧭 بوصلة</div>
+    <div class="subtitle">منصة الكشف المبكر عن صعوبات التعلم</div>
+  </div>
+  <div class="badge">Chatbot API v1.0</div>
+</div>
+
+<div id="instructions">
+  <strong>خطوات التجربة:</strong>
+  <ol>
+    <li>اضغط <strong>POST /login</strong> → <code>Try it out</code> → سجّل دخولك واحصل على الـ <code>token</code></li>
+    <li>اضغط <strong>Authorize 🔒</strong> في الأعلى → الصق الـ token</li>
+    <li>جرّب <strong>POST /chatbot/ask</strong> باختر example من القائمة وغيّر الـ <code>message</code> لأي سؤال عربي</li>
+    <li>جرّب <strong>POST /chatbot/explain-result</strong> و <strong>recommend-exercises</strong> بنفس الطريقة</li>
+  </ol>
+</div>
+
+<div id="safety-note">
+  ⚠️ <strong>تذكير:</strong> المساعد لا يُشخّص طبياً. كل الردود مؤشرات أولية مبنية على أداء الطفل داخل المنصة.
+</div>
+
+<div id="swagger-ui"></div>
+
+<script src="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui-bundle.js"></script>
+<script src="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui-standalone-preset.js"></script>
+<script>
+  window.onload = function () {
+    SwaggerUIBundle({
+      url: "/openapi.json",
+      dom_id: "#swagger-ui",
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIStandalonePreset
+      ],
+      layout: "StandaloneLayout",
+      deepLinking: true,
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      defaultModelsExpandDepth: 2,
+      defaultModelExpandDepth: 2,
+      docExpansion: "list",
+      filter: true,
+      tagsSorter: "alpha",
+      operationsSorter: "alpha",
+      tryItOutEnabled: true,
+      requestInterceptor: function(req) {
+        // Ensure JSON content type for all requests
+        if (req.body) {
+          req.headers['Content-Type'] = 'application/json';
+          req.headers['Accept'] = 'application/json';
+        }
+        return req;
+      }
+    });
+  };
+</script>
+</body>
+</html>

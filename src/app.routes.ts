@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/core/shared/layout/app-layout';
-import { Dashboard } from '@/pages/Dashboard/dashboard';
+import { Dashboard } from '@/pages/dashboard/dashboard';
 import { TrainingComponent } from '@/pages/Training/training';
 import { TrainingLevelsComponent } from '@/pages/Training/Training-Levels/training-levels';
 import { HistoryComponent } from './app/pages/history/history.component';

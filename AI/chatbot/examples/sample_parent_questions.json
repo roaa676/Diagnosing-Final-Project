@@ -1,0 +1,196 @@
+{
+  "_comment": "أمثلة على أسئلة أولياء الأمور المتوقعة وتصنيفها حسب النوع",
+
+  "question_categories": [
+    {
+      "category_id": "result_inquiry",
+      "arabic_label": "استفسار عن النتيجة",
+      "questions": [
+        {
+          "id": "q001",
+          "arabic": "ابني جاب نتيجة قليلة، ده معناه إيه؟",
+          "intent": "explain_low_score",
+          "expected_response_type": "score_explanation_with_exercises",
+          "triggers_disclaimer": true
+        },
+        {
+          "id": "q002",
+          "arabic": "إيه معنى مؤشر صعوبة مرتفع؟",
+          "intent": "explain_score_level",
+          "expected_response_type": "score_level_explanation",
+          "triggers_disclaimer": true
+        },
+        {
+          "id": "q003",
+          "arabic": "الطفل عمل 42 في الانعكاس المرآتي، ده مشكلة؟",
+          "intent": "score_context",
+          "expected_response_type": "reassuring_explanation_with_next_steps",
+          "triggers_disclaimer": true
+        },
+        {
+          "id": "q004",
+          "arabic": "النتيجة الجيدة عندكم من كام لكام؟",
+          "intent": "explain_scoring_system",
+          "expected_response_type": "scoring_scale_explanation",
+          "triggers_disclaimer": false
+        }
+      ]
+    },
+    {
+      "category_id": "diagnosis_concern",
+      "arabic_label": "قلق من التشخيص",
+      "questions": [
+        {
+          "id": "q010",
+          "arabic": "هل ابني عنده ديسلكسيا؟",
+          "intent": "diagnosis_question",
+          "expected_response_type": "no_diagnosis_explanation_with_indicators",
+          "triggers_disclaimer": true,
+          "forbidden_response": "طفلك مصاب بعسر القراءة"
+        },
+        {
+          "id": "q011",
+          "arabic": "طفلي مريض؟",
+          "intent": "health_concern",
+          "expected_response_type": "reassurance_no_medical_claim",
+          "triggers_disclaimer": true,
+          "forbidden_response": "نعم طفلك مريض"
+        },
+        {
+          "id": "q012",
+          "arabic": "هل هذا طبيعي؟",
+          "intent": "normalization_question",
+          "expected_response_type": "reassurance_with_context",
+          "triggers_disclaimer": true
+        },
+        {
+          "id": "q013",
+          "arabic": "هل عندك تأكيد إن في مشكلة؟",
+          "intent": "confirmation_request",
+          "expected_response_type": "honest_uncertainty_with_guidance",
+          "triggers_disclaimer": true
+        }
+      ]
+    },
+    {
+      "category_id": "skill_explanation",
+      "arabic_label": "شرح المهارات والمصطلحات",
+      "questions": [
+        {
+          "id": "q020",
+          "arabic": "يعني إيه انعكاس مرآتي؟",
+          "intent": "explain_mirroring",
+          "expected_response_type": "simple_skill_explanation_with_examples",
+          "skill_id": "dyslexia_mirroring"
+        },
+        {
+          "id": "q021",
+          "arabic": "ليه بيبدل بطة وطبة؟",
+          "intent": "word_reversal_explanation",
+          "expected_response_type": "word_reversal_explanation",
+          "skill_id": "dyslexia_mirroring"
+        },
+        {
+          "id": "q022",
+          "arabic": "ليه بيخلط بين 12 و21؟",
+          "intent": "number_reversal_explanation",
+          "expected_response_type": "place_value_explanation",
+          "skill_id": "dyscalculia_number_reversal"
+        },
+        {
+          "id": "q023",
+          "arabic": "يعني إيه التمييز البصري؟",
+          "intent": "explain_visual_discrimination",
+          "expected_response_type": "simple_skill_explanation",
+          "skill_id": "dyslexia_visual_discrimination"
+        },
+        {
+          "id": "q024",
+          "arabic": "إيه الفرق بين عسر القراءة وعسر الحساب؟",
+          "intent": "compare_difficulties",
+          "expected_response_type": "comparative_explanation"
+        }
+      ]
+    },
+    {
+      "category_id": "exercise_request",
+      "arabic_label": "طلب تمارين ونشاطات",
+      "questions": [
+        {
+          "id": "q030",
+          "arabic": "إيه التمرين المناسب ليه؟",
+          "intent": "exercise_recommendation",
+          "expected_response_type": "tailored_exercise_list",
+          "requires_child_context": true
+        },
+        {
+          "id": "q031",
+          "arabic": "أعمل إيه في البيت؟",
+          "intent": "home_activities",
+          "expected_response_type": "home_activities_list",
+          "requires_child_context": true
+        },
+        {
+          "id": "q032",
+          "arabic": "كام دقيقة التمرين يومياً؟",
+          "intent": "duration_question",
+          "expected_response_type": "session_duration_advice"
+        },
+        {
+          "id": "q033",
+          "arabic": "فين التمارين في التطبيق؟",
+          "intent": "platform_navigation",
+          "expected_response_type": "platform_guidance"
+        }
+      ]
+    },
+    {
+      "category_id": "specialist_referral",
+      "arabic_label": "الاستشارة الطبية والمتخصص",
+      "questions": [
+        {
+          "id": "q040",
+          "arabic": "هل محتاج دكتور؟",
+          "intent": "specialist_needed",
+          "expected_response_type": "conditional_referral_advice"
+        },
+        {
+          "id": "q041",
+          "arabic": "أروح لمين؟ دكتور ولا معالج؟",
+          "intent": "specialist_type",
+          "expected_response_type": "specialist_type_guidance"
+        },
+        {
+          "id": "q042",
+          "arabic": "المنصة بتحل محل الدكتور؟",
+          "intent": "platform_vs_doctor",
+          "expected_response_type": "platform_limitation_explanation"
+        }
+      ]
+    },
+    {
+      "category_id": "emotional_support",
+      "arabic_label": "الدعم العاطفي لولي الأمر",
+      "questions": [
+        {
+          "id": "q050",
+          "arabic": "أنا قلقان على ابني جداً",
+          "intent": "parental_anxiety",
+          "expected_response_type": "empathy_first_then_guidance"
+        },
+        {
+          "id": "q051",
+          "arabic": "مش عارف أعمل إيه",
+          "intent": "parental_overwhelm",
+          "expected_response_type": "step_by_step_reassurance"
+        },
+        {
+          "id": "q052",
+          "arabic": "هل هيتحسن؟",
+          "intent": "prognosis_question",
+          "expected_response_type": "hopeful_honest_answer"
+        }
+      ]
+    }
+  ]
+}
