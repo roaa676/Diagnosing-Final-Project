@@ -20,11 +20,28 @@ class GameController extends Controller
     }
 
     // 2. دالة جلب الاختبار الشامل للتشخيص (تسحب أسئلة الـ assessment فقط)
-    public function getAssessmentContent(int $difficulty_id)
+    // 2. دالة جلب الاختبار الشامل للتشخيص (مع التحقق من فترة الـ 90 يوم)
+    public function getAssessmentContent(int $child_id, int $difficulty_id)
     {
-        // هنجيب مستويات التقييم بس للصعوبة دي مرتبة تصاعدياً
+        // 💡 القاعدة: التحقق من تاريخ آخر تقييم (Assessment Interval)
+        $lastAssessment = GameResult::where('child_id', $child_id)
+            ->where('game_type', 'assessment')
+            ->where('learning_difficulty_id', $difficulty_id)
+            ->latest()
+            ->first();
+
+        if ($lastAssessment && $lastAssessment->created_at->diffInDays(now()) < 90) {
+            $daysPassed = $lastAssessment->created_at->diffInDays(now());
+            $remainingDays = 90 - $daysPassed;
+            return response()->json([
+                'status' => 'blocked', 
+                'message' => 'عفواً، لا يمكنك إجراء التقييم حالياً. التقييم متاح مرة أخرى بعد ' . $remainingDays . ' يوم.'
+            ], 403);
+        }
+
+        // ... استكمال منطق جلب الأسئلة كما هو ...
         $levels = GameContent::where('learning_difficulty_id', $difficulty_id)
-                    ->where('content_type', 'assessment') // 💡 التعديل هنا: أسئلة تقييم فقط
+                    ->where('content_type', 'assessment')
                     ->orderBy('difficulty_level', 'asc')
                     ->get();
 
@@ -34,45 +51,55 @@ class GameController extends Controller
 
         $assessmentLevels = [];
 
-        // بنمشي على كل مستوى ونجهز أسئلته لوحدها
         foreach ($levels as $level) {
             $data = json_decode($level->content_data, true);
             
             if (isset($data['questions'])) {
-                // سحب 8 أسئلة عشوائية من البنك الخاص بهذا المستوى
                 $shuffledQuestions = collect($data['questions'])->shuffle()->take(8)->map(function ($question) use ($difficulty_id, $level) {
-                    
-                    // لخبطة الاختيارات
                     if ($difficulty_id == 1 && isset($question['options'])) {
                         $question['options'] = collect($question['options'])->shuffle()->toArray();
                     }
-                    
                     $question['difficulty_level'] = $level->difficulty_level; 
                     return $question;
                 });
 
-                // تجميع الداتا كـ "بلوك" كامل لكل مستوى
                 $assessmentLevels[] = [
                     'difficulty_level' => $level->difficulty_level,
                     'level_name' => $level->level_name,
-                    'questions' => $shuffledQuestions->values()->all() // الـ 8 أسئلة
+                    'questions' => $shuffledQuestions->values()->all()
                 ];
             }
         }
 
         return response()->json([
             'status' => 'success',
-            'assessment_data' => $assessmentLevels // مصفوفة متدرجة من المستويات
+            'assessment_data' => $assessmentLevels
         ]);
     }
 
     // 3. دالة جلب مستوى معين للتدريب اليومي (تسحب أسئلة الـ training فقط)
-    public function getGameContent(int $difficulty_id, int $level)
+    // 3. دالة جلب مستوى معين للتدريب اليومي (مع قاعدة الـ 20 سؤال)
+    public function getGameContent(Request $request, int $difficulty_id, int $level)
     {
+        $child_id = $request->child_id; // لازم الفرونت إند يبعت الـ child_id في الريكويست
+
+        // 💡 القاعدة 2: التحقق من الحد اليومي (الطفل ميتعداش 20 سؤال)
+        // بنحسب هو حل كام سؤال النهاردة من جدول الـ TrainingLogs
+        $solvedToday = \App\Models\TrainingLog::where('child_id', $child_id)
+            ->whereDate('created_at', today())
+            ->count();
+
+        if ($solvedToday >= 20) {
+            return response()->json([
+                'status' => 'limit_reached', 
+                'message' => 'أنت بطل! لقد أنهيت تدريب اليوم، نراك غداً لمواصلة التقدم.'
+            ], 429); // 429 Too Many Requests
+        }
+
         // 1. جلب بنك أسئلة التدريب للمستوى المطلوب
         $gameContent = GameContent::where('learning_difficulty_id', $difficulty_id)
                     ->where('difficulty_level', $level)
-                    ->where('content_type', 'training') // 💡 التعديل هنا: أسئلة تدريب فقط
+                    ->where('content_type', 'training')
                     ->first();
 
         if (!$gameContent) {
@@ -97,17 +124,18 @@ class GameController extends Controller
             'status' => 'success',
             'level_name' => $gameContent->level_name,
             'difficulty_level' => $gameContent->difficulty_level,
-            'questions' => $randomizedQuestions->values()->all() // إرجاع أسئلة التدريب (8 عشوائيين)
+            'questions' => $randomizedQuestions->values()->all()
         ]);
     }
 
     // 4. دالة حفظ نتيجة التقييم (وحساب الـ Z-Score وتحديد مسار التدريب)
-    public function submitGameResult(Request $request)
+   public function submitGameResult(Request $request)
     {
         $request->validate([
             'child_id' => 'required|exists:children,id',
-            'game_type' => 'required|string',
-            'raw_score' => 'required|numeric'
+            'game_type' => 'required|string', // 'assessment' or 'training'
+            'raw_score' => 'required|numeric',
+            'learning_difficulty_id' => 'required|exists:learning_difficulties,id', // ضروري للتحقق من الـ 90 يوم
         ]);
 
         $child = Child::where('id', $request->child_id)
@@ -118,54 +146,72 @@ class GameController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized access'], 403);
         }
 
-        // 1. حساب الـ Z-Score والنتيجة
+        // 1. [قاعدة الـ 90 يوم]: التحقق قبل حفظ أي تقييم جديد
+        if ($request->game_type === 'assessment') {
+            $lastAssessment = GameResult::where('child_id', $child->id)
+                ->where('game_type', 'assessment')
+                ->where('learning_difficulty_id', $request->learning_difficulty_id)
+                ->latest()
+                ->first();
+
+            if ($lastAssessment && $lastAssessment->created_at->diffInDays(now()) < 90) {
+                return response()->json(['status' => 'blocked', 'message' => 'التقييم متاح كل 3 أشهر فقط.'], 403);
+            }
+        }
+
+        // 2. [قاعدة الـ 20 سؤال]: لو نوع اللعبة تدريب، سجل الجلسة في الـ TrainingLog
+        if ($request->game_type === 'training') {
+            // التحقق من الحد اليومي قبل الحفظ
+            $solvedToday = \App\Models\TrainingLog::where('child_id', $child->id)
+                ->whereDate('created_at', today())
+                ->count();
+
+            if ($solvedToday >= 20) {
+                return response()->json(['status' => 'limit_reached', 'message' => 'أنت بطل! لقد أنهيت تدريب اليوم.'], 429);
+            }
+            
+            // تسجيل الجلسة/السؤال
+            \App\Models\TrainingLog::create(['child_id' => $child->id]);
+        }
+
+        // 3. حساب الـ Z-Score والنتيجة (المنطق الأصلي)
         $analysis = $this->diagnosisService->calculateGameZScore(
             $child->age, 
             $request->game_type, 
             (float) $request->raw_score
         );
 
-        // 2. حفظ النتيجة في الداتا بيز
+        // 4. حفظ النتيجة
         $result = GameResult::create([
             'child_id' => $child->id,
+            'learning_difficulty_id' => $request->learning_difficulty_id,
             'game_type' => $request->game_type,
             'raw_score' => $request->raw_score,
             'z_score' => $analysis['z_score'],
             'risk_level' => $analysis['risk_level'],
         ]);
 
-        // 3. ترشيح مسار التدريب بناءً على النتيجة
-        $startingLevel = 1;
-        $startingPercentage = 0;
+        // 5. ترشيح مسار التدريب (تحديث مستوى الطفل)
+        $trainingProgress = null;
+        if ($request->game_type === 'assessment') {
+            $startingLevel = ($analysis['risk_level'] === 'Moderate Risk') ? 2 : (($analysis['risk_level'] === 'No Risk') ? 3 : 1);
+            $startingPercentage = ($analysis['risk_level'] === 'Moderate Risk') ? 30 : (($analysis['risk_level'] === 'No Risk') ? 60 : 0);
 
-        if ($analysis['risk_level'] === 'Moderate Risk') {
-            $startingLevel = 2;
-            $startingPercentage = 30;
-        } elseif ($analysis['risk_level'] === 'No Risk') {
-            $startingLevel = 3;
-            $startingPercentage = 60;
+            $trainingProgress = TrainingProgress::updateOrCreate(
+                ['child_id' => $child->id, 'training_type' => 'general'], // أو حسب نوع الصعوبة
+                [
+                    'current_level' => $startingLevel,
+                    'progress_percentage' => $startingPercentage,
+                    'next_level_unlocks_at' => now(),
+                ]
+            );
         }
 
-        // 4. حفظ أو تحديث مسار التدريب للطفل
-        $trainingProgress = TrainingProgress::updateOrCreate(
-            [
-                'child_id' => $child->id, 
-                'training_type' => $request->game_type
-            ],
-            [
-                'current_level' => $startingLevel,
-                'progress_percentage' => $startingPercentage,
-                'next_level_unlocks_at' => now(), // يقدر يبدأ التدريب فوراً
-            ]
-        );
-
-        // 5. إرجاع الرد للفرونت إند
         return response()->json([
             'status' => 'success',
-            'message' => 'تم حفظ وتحليل النتيجة وتحديد مسار التدريب بنجاح',
+            'message' => 'تم حفظ وتحليل النتيجة بنجاح',
             'analysis' => $analysis,
-            'data' => $result,
-            'training_roadmap' => $trainingProgress // تفاصيل التدريب
+            'training_roadmap' => $trainingProgress
         ], 201);
     }
 }
