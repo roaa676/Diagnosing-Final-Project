@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Child;
-use Illuminate\Support\Facades\Storage; // ضروري جداً لمسح الملفات القديمة
+use Illuminate\Support\Facades\Storage;
 
 class ChildController extends Controller
 {
@@ -14,6 +14,15 @@ class ChildController extends Controller
     public function index(Request $request)
     {
         $children = Child::where('user_id', $request->user()->id)->get();
+
+        // اللف على كل طفل والتحقق من جدول الاستبيان وجدول التقييم
+        foreach ($children as $child) {
+            // 1. هل حل الاستبيان؟
+            $child->has_completed_questionnaire = \App\Models\Questionnaire::where('child_id', $child->id)->exists();
+            
+            // 2. هل حل ألعاب التقييم؟ (تأكد إن الموديل اسمه GameResult)
+            $child->has_completed_assessment = \App\Models\GameResult::where('child_id', $child->id)->exists();
+        }
 
         return response()->json([
             'status' => 'success',
@@ -33,6 +42,10 @@ class ChildController extends Controller
         if (!$child) {
             return response()->json(['status' => 'error', 'message' => 'الطفل غير موجود أو غير مصرح لك'], 404);
         }
+
+        // التحقق من الاستبيان والتقييم للطفل المحدد
+        $child->has_completed_questionnaire = \App\Models\Questionnaire::where('child_id', $child->id)->exists();
+        $child->has_completed_assessment = \App\Models\GameResult::where('child_id', $child->id)->exists();
 
         return response()->json([
             'status' => 'success',
@@ -56,6 +69,10 @@ class ChildController extends Controller
             'age' => $request->age,
         ]);
 
+        // طفل جديد معناه أكيد لسه معملش الاستبيان ولا التقييم
+        $child->has_completed_questionnaire = false;
+        $child->has_completed_assessment = false;
+
         return response()->json([
             'status' => 'success',
             'message' => 'تم إضافة ملف الطفل بنجاح',
@@ -72,7 +89,6 @@ class ChildController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // التأكد من أن الطفل يخص المستخدم الحالي
         $child = Child::where('id', $id)
                       ->where('user_id', $request->user()->id)
                       ->first();
@@ -81,17 +97,13 @@ class ChildController extends Controller
             return response()->json(['status' => 'error', 'message' => 'غير مصرح لك بتعديل بيانات هذا الطفل'], 403);
         }
 
-        // 1. مسح الصورة القديمة من السيرفر إذا وجدت
         if ($child->image) {
-            // نقوم بإزالة 'storage/' من المسار للوصول للملف الحقيقي في الـ disk
             $oldPath = str_replace('storage/', '', $child->image);
             Storage::disk('public')->delete($oldPath);
         }
 
-        // 2. رفع الصورة الجديدة في مجلد 'children_profiles'
         $path = $request->file('image')->store('children_profiles', 'public');
 
-        // 3. تحديث مسار الصورة في قاعدة البيانات
         $child->update([
             'image' => 'storage/' . $path
         ]);
