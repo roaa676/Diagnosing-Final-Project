@@ -1,0 +1,752 @@
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { AssessmentOption, AssessmentQuestion, AssessmentService } from '@/core/services/assessment.service';
+
+type OptionId = number | string;
+type SelectedAnswer = OptionId | OptionId[] | null;
+type QuestionType = 'multiple_choice' | 'true_false' | 'matching' | 'ordering' | 'audio' | 'visual' | string;
+
+interface QuestionOption {
+    id: OptionId;
+    text: string;
+    image?: string;
+}
+
+interface Question {
+    id: number;
+    question: string;
+    type: QuestionType;
+    options: QuestionOption[];
+    correct_answer?: OptionId | OptionId[];
+    time_limit: number;
+    explanation?: string;
+    points: number;
+    category?: string;
+    audio_url?: string;
+    image_url?: string;
+}
+
+interface SavedAnswer {
+    selected: SelectedAnswer;
+    correct?: OptionId | OptionId[];
+    isCorrect: boolean;
+    points: number;
+    timeTaken: number;
+}
+
+interface AssessmentState {
+    currentQuestionIndex: number;
+    answers: Record<number, SavedAnswer>;
+    score: number;
+    timeElapsed: number;
+}
+
+@Component({
+    selector: 'app-assessment',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    templateUrl: './assessment.component.html',
+    styleUrls: ['./assessment.component.css']
+})
+export class AssessmentComponent implements OnInit, OnDestroy {
+    questions: Question[] = [];
+    state: AssessmentState = {
+        currentQuestionIndex: 0,
+        answers: {},
+        score: 0,
+        timeElapsed: 0
+    };
+
+    loading = true;
+    errorMessage = '';
+    submitted = false;
+    submittingResult = false;
+    resultSaved = false;
+    resultErrorMessage = '';
+    difficultyId = 0;
+    childId = 0;
+    currentQuestion: Question | null = null;
+    selectedOption: SelectedAnswer = null;
+    timeRemaining = 30;
+    totalScore = 0;
+    maxScore = 0;
+    scorePercentage = 0;
+    correctAnswersCount = 0;
+    difficultyName = '';
+    greetingMessage = 'مرحباً يا بطل!';
+    totalTime = 0;
+    playingAudio = false;
+
+    private readonly defaultQuestionTime = 30;
+    private readonly defaultQuestionPoints = 10;
+    private destroy$ = new Subject<void>();
+    private timerInterval: ReturnType<typeof setInterval> | null = null;
+    private currentAudio: HTMLAudioElement | null = null;
+
+    constructor(
+        private assessmentService: AssessmentService,
+        public router: Router,
+        private route: ActivatedRoute
+    ) {}
+
+    ngOnInit(): void {
+        // أولاً نحاول نجيب آخر نتيجة محفوظة
+        this.loadLastAssessmentIfExists();
+    }
+
+    // onShowQuestions(): void {
+    //     console.log('[Assessment] onShowQuestions() clicked');
+    //     this.submitted = false;
+    //     this.loading = true;
+    //     this.errorMessage = '';
+    //     this.loadAssessment();
+    // }
+
+
+
+    /**
+     * لو فيه نتيجة assessment محفوظة قبل كده للطفل + game_type (difficultyId)
+     * هنظهر شاشة النتائج بدون فتح أسئلة التقييم.
+     */
+    private loadLastAssessmentIfExists(): void {
+        const difficultyId = this.getNumericQueryParam('difficultyId') ?? this.getStoredDifficultyId();
+        const childId = this.getNumericQueryParam('childId') ?? this.getStoredChildId();
+
+        if (!difficultyId || !childId) {
+            // لو طفل جديد/مفيش ids متاحة لحد دلوقتي هنكمل تحميل الأسئلة بالطريقة القديمة
+            this.loadAssessment();
+            return;
+        }
+
+
+        this.difficultyId = difficultyId;
+        this.childId = childId;
+        this.storeCurrentSelection();
+
+        this.submitted = false;
+        this.loading = true;
+        this.assessmentService
+            .getAssessmentResult(this.childId, String(this.difficultyId))
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (res) => {
+                    const data = res?.data;
+                    if (data?.raw_score !== undefined && data?.raw_score !== null) {
+                        this.submitted = true;
+                        this.loading = false;
+                        this.totalScore = Number(data.raw_score) || 0;
+                        // maxScore/scorePercentage/الإجابات الصحيحة هنتعامل معها لما نعمل load للأسئلة
+                        this.scorePercentage = 0;
+                        this.correctAnswersCount = 0;
+                        this.totalTime = 0;
+                        return;
+                    }
+
+                    // مفيش نتيجة محفوظة: نكمل تحميل الأسئلة
+                    this.loadAssessment();
+                },
+
+                error: () => {
+                    // لو فشلنا في جلب النتيجة: نعمل كـ fallback تحميل أسئلة التقييم
+                    this.loadAssessment();
+                }
+            });
+    }
+
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+        this.stopTimer();
+        this.stopAudio();
+    }
+
+    loadAssessment(): void {
+        console.log('[Assessment] loadAssessment() called');
+        const difficultyId = this.getNumericQueryParam('difficultyId') ?? this.getStoredDifficultyId();
+        const childId = this.getNumericQueryParam('childId') ?? this.getStoredChildId();
+        if (!difficultyId || !childId) {
+            this.errorMessage = 'معرّفات الطفل أو مستوى الصعوبة غير صحيحة';
+            this.loading = false;
+            return;
+        }
+        this.difficultyId = difficultyId;
+        this.childId = childId;
+        console.log('Loading assessment for Child:', this.childId, 'Difficulty:', this.difficultyId);
+        this.storeCurrentSelection();
+
+        this.assessmentService
+            .getAssessmentContent(this.difficultyId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    const content = response.data;
+
+                    // backend يرجع data كمصفوفة levels (التقييم المبدئي)
+                    const selectedLevel = Array.isArray(content) ? content[0] : (content as any);
+
+                    // Debug سريع لمعرفة شكل response وكيفية ظهور الأسئلة
+                    console.log('assessment response.data =', content);
+                    console.log('selectedLevel =', selectedLevel);
+                    console.log('first question =', selectedLevel?.questions?.[0]);
+
+                    this.questions = (selectedLevel?.questions ?? []).map((question: any, index: number) => this.normalizeQuestion(question, index));
+                    this.difficultyName = selectedLevel?.level_name || 'التقييم المبدئي';
+                    this.totalTime = this.questions.reduce((sum, question) => sum + question.time_limit, 0);
+                    this.maxScore = this.questions.reduce((sum, question) => sum + question.points, 0);
+
+
+                    if (!this.questions.length) {
+                        this.errorMessage = 'لا توجد أسئلة متاحة لهذا التقييم حالياً';
+                        this.loading = false;
+                        return;
+                    }
+
+                    this.loading = false;
+                    this.setCurrentQuestion(0);
+                },
+                error: (error) => {
+                    this.errorMessage = error?.error?.message || 'فشل تحميل أسئلة التقييم';
+                    this.loading = false;
+                }
+            });
+    }
+
+    selectOption(optionId: OptionId): void {
+        this.selectedOption = optionId;
+    }
+
+    isSelected(optionId: OptionId): boolean {
+        if (Array.isArray(this.selectedOption)) {
+            return this.selectedOption.some((selectedId) => this.isSameValue(selectedId, optionId));
+        }
+
+        return this.selectedOption !== null && this.isSameValue(this.selectedOption, optionId);
+    }
+
+    nextQuestion(): void {
+        this.saveCurrentAnswer();
+        this.stopTimer();
+
+        if (this.isLastQuestion()) {
+            this.finishAssessment();
+            return;
+        }
+
+        this.setCurrentQuestion(this.state.currentQuestionIndex + 1);
+    }
+
+    previousQuestion(): void {
+        if (!this.canGoPrevious()) {
+            return;
+        }
+
+        this.saveCurrentAnswer();
+        this.stopTimer();
+        this.setCurrentQuestion(this.state.currentQuestionIndex - 1);
+    }
+
+    moveOrderingOption(index: number, direction: -1 | 1): void {
+        if (!this.currentQuestion || !this.isOrderingQuestion(this.currentQuestion)) {
+            return;
+        }
+
+        const currentOrder = this.getSelectedOrder();
+        const targetIndex = index + direction;
+
+        if (targetIndex < 0 || targetIndex >= currentOrder.length) {
+            return;
+        }
+
+        const movedItem = currentOrder[index];
+        currentOrder[index] = currentOrder[targetIndex];
+        currentOrder[targetIndex] = movedItem;
+        this.selectedOption = currentOrder;
+    }
+
+    canMoveOrderingOption(index: number, direction: -1 | 1): boolean {
+        if (!this.currentQuestion || !this.isOrderingQuestion(this.currentQuestion)) {
+            return false;
+        }
+
+        const targetIndex = index + direction;
+        return targetIndex >= 0 && targetIndex < this.currentQuestion.options.length;
+    }
+
+    canGoPrevious(): boolean {
+        return this.state.currentQuestionIndex > 0;
+    }
+
+    isLastQuestion(): boolean {
+        return this.state.currentQuestionIndex === this.questions.length - 1;
+    }
+
+    getProgress(): number {
+        if (!this.questions.length) {
+            return 0;
+        }
+
+        return Math.round(((this.state.currentQuestionIndex + 1) / this.questions.length) * 100);
+    }
+
+    formatTime(seconds: number): string {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    playAudio(url: string): void {
+        if (!url) {
+            return;
+        }
+
+        this.stopAudio();
+        this.currentAudio = new Audio(url);
+        this.playingAudio = true;
+
+        this.currentAudio.onended = () => {
+            this.playingAudio = false;
+            this.currentAudio = null;
+        };
+
+        this.currentAudio.onerror = () => {
+            this.playingAudio = false;
+            this.currentAudio = null;
+        };
+
+        this.currentAudio.play().catch(() => {
+            this.playingAudio = false;
+            this.currentAudio = null;
+        });
+    }
+
+    isChoiceQuestion(question: Question): boolean {
+        return ['multiple_choice', 'true_false', 'audio'].includes(question.type) || !this.isSpecialQuestion(question);
+    }
+
+    isVisualQuestion(question: Question): boolean {
+        return question.type === 'visual' || question.type === 'matching';
+    }
+
+    isOrderingQuestion(question: Question): boolean {
+        return question.type === 'ordering';
+    }
+
+    get orderedOptions(): QuestionOption[] {
+        if (!this.currentQuestion) {
+            return [];
+        }
+
+        if (!this.isOrderingQuestion(this.currentQuestion)) {
+            return this.currentQuestion.options;
+        }
+
+        const selectedOrder = this.getSelectedOrder();
+        const optionsById = new Map(this.currentQuestion.options.map((option) => [String(option.id), option]));
+        const orderedOptions = selectedOrder.map((optionId) => optionsById.get(String(optionId))).filter((option): option is QuestionOption => Boolean(option));
+        const missingOptions = this.currentQuestion.options.filter((option) => !selectedOrder.some((optionId) => this.isSameValue(optionId, option.id)));
+
+        return [...orderedOptions, ...missingOptions];
+    }
+
+    getNextButtonText(): string {
+        return this.isLastQuestion() ? 'إنهاء التقييم' : 'السؤال التالي';
+    }
+
+    getResultMessage(): string {
+        if (this.scorePercentage >= 80) {
+            return 'ممتاز جداً! أداء الطفل رائع.';
+        }
+
+        if (this.scorePercentage >= 50) {
+            return 'جيد! يوجد تقدم ملحوظ ويمكن تحسينه بالتدريب.';
+        }
+
+        return 'يحتاج الطفل إلى تدريب إضافي ومتابعة مستمرة.';
+    }
+    
+    onShowQuestions(): void {
+        this.submitted = false;
+        this.loading = true;
+        this.errorMessage = '';
+        this.loadAssessment();
+    }
+
+    retrySubmitResult(): void {
+        this.submitAssessmentResult();
+    }
+
+
+    navigateToQuestionnaire(): void {
+        this.router.navigate(['/questionnaire'], {
+            queryParams: {
+                childId: this.childId || null,
+                difficultyId: this.difficultyId || null
+            }
+        });
+    }
+
+    navigateToTraining(): void {
+        this.router.navigate(['/training'], {
+            queryParams: {
+                childId: this.childId,
+                difficultyId: this.difficultyId
+            }
+        });
+    }
+
+    private normalizeQuestion(rawQuestion: AssessmentQuestion, questionIndex: number): Question {
+        const options = (rawQuestion.options ?? []).map((option, optionIndex) => this.normalizeOption(option, optionIndex));
+        const timeLimit = this.toPositiveNumber(rawQuestion.time_limit, this.defaultQuestionTime);
+        const points = this.toPositiveNumber(rawQuestion.points, this.defaultQuestionPoints);
+
+        return {
+            id: rawQuestion.id ?? questionIndex + 1,
+            question: rawQuestion.question || (rawQuestion as any).target || (rawQuestion as any).text || `السؤال ${questionIndex + 1}`,
+            type: rawQuestion.type || 'multiple_choice',
+            options,
+            correct_answer: this.resolveCorrectAnswer(rawQuestion.correct_answer, options),
+            time_limit: timeLimit,
+            explanation: rawQuestion.explanation,
+            points,
+            category: rawQuestion.category,
+            audio_url: rawQuestion.audio_url,
+            image_url: rawQuestion.image_url
+        };
+    }
+
+    private normalizeOption(option: string | AssessmentOption, optionIndex: number): QuestionOption {
+        if (typeof option === 'string') {
+            return {
+                id: optionIndex + 1,
+                text: option
+            };
+        }
+
+        return {
+            id: option.id ?? optionIndex + 1,
+            text: option.text || String(option.id ?? `اختيار ${optionIndex + 1}`),
+            image: option.image
+        };
+    }
+
+    private resolveCorrectAnswer(correctAnswer: number | string | Array<number | string> | null | undefined, options: QuestionOption[]): OptionId | OptionId[] | undefined {
+        if (correctAnswer === undefined || correctAnswer === null || correctAnswer === '') {
+            return undefined;
+        }
+
+        if (Array.isArray(correctAnswer)) {
+            return correctAnswer.map((answer) => this.resolveSingleCorrectAnswer(answer, options));
+        }
+
+        return this.resolveSingleCorrectAnswer(correctAnswer, options);
+    }
+
+    private resolveSingleCorrectAnswer(answer: number | string, options: QuestionOption[]): OptionId {
+        const matchedById = options.find((option) => this.isSameValue(option.id, answer));
+        if (matchedById) {
+            return matchedById.id;
+        }
+
+        const matchedByText = options.find((option) => this.isSameValue(option.text, answer));
+        return matchedByText?.id ?? answer;
+    }
+
+    private setCurrentQuestion(questionIndex: number): void {
+        this.state.currentQuestionIndex = questionIndex;
+        this.currentQuestion = this.questions[questionIndex] ?? null;
+        this.selectedOption = this.getSavedSelection(this.currentQuestion);
+        this.startTimer();
+    }
+
+    private getSavedSelection(question: Question | null): SelectedAnswer {
+        if (!question) {
+            return null;
+        }
+
+        const savedAnswer = this.state.answers[question.id]?.selected;
+        if (savedAnswer !== undefined) {
+            return savedAnswer;
+        }
+
+        if (this.isOrderingQuestion(question)) {
+            return question.options.map((option) => option.id);
+        }
+
+        return null;
+    }
+
+    private startTimer(): void {
+        if (!this.currentQuestion) {
+            return;
+        }
+
+        this.stopTimer();
+        this.timeRemaining = this.currentQuestion.time_limit;
+
+        this.timerInterval = setInterval(() => {
+            this.timeRemaining -= 1;
+            this.state.timeElapsed += 1;
+
+            if (this.timeRemaining <= 0) {
+                this.nextQuestion();
+            }
+        }, 1000);
+    }
+
+    private stopTimer(): void {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+
+    private stopAudio(): void {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio.currentTime = 0;
+            this.currentAudio = null;
+        }
+
+        this.playingAudio = false;
+    }
+
+    private saveCurrentAnswer(): void {
+        if (!this.currentQuestion) {
+            return;
+        }
+
+        const selectedAnswer = this.getCurrentSelectedAnswer();
+        const isCorrect = selectedAnswer !== null && this.isAnswerCorrect(selectedAnswer, this.currentQuestion.correct_answer);
+        const points = isCorrect ? this.currentQuestion.points : 0;
+
+        this.state.answers[this.currentQuestion.id] = {
+            selected: selectedAnswer,
+            correct: this.currentQuestion.correct_answer,
+            isCorrect,
+            points,
+            timeTaken: Math.max(this.currentQuestion.time_limit - this.timeRemaining, 0)
+        };
+
+        this.recalculateScore();
+    }
+
+    private getCurrentSelectedAnswer(): SelectedAnswer {
+        if (!this.currentQuestion) {
+            return null;
+        }
+
+        if (this.isOrderingQuestion(this.currentQuestion)) {
+            return this.getSelectedOrder();
+        }
+
+        return this.selectedOption;
+    }
+
+    private getSelectedOrder(): OptionId[] {
+        if (!this.currentQuestion) {
+            return [];
+        }
+
+        if (Array.isArray(this.selectedOption)) {
+            return [...this.selectedOption];
+        }
+
+        return this.currentQuestion.options.map((option) => option.id);
+    }
+
+    private isAnswerCorrect(selectedAnswer: Exclude<SelectedAnswer, null>, correctAnswer?: OptionId | OptionId[]): boolean {
+        if (correctAnswer === undefined) {
+            return false;
+        }
+
+        if (Array.isArray(correctAnswer)) {
+            if (!Array.isArray(selectedAnswer) || selectedAnswer.length !== correctAnswer.length) {
+                return false;
+            }
+
+            return correctAnswer.every((answer, index) => this.isSameValue(answer, selectedAnswer[index]));
+        }
+
+        return !Array.isArray(selectedAnswer) && this.isSameValue(selectedAnswer, correctAnswer);
+    }
+
+    private recalculateScore(): void {
+        this.state.score = Object.values(this.state.answers).reduce((sum, answer) => sum + answer.points, 0);
+    }
+
+    private finishAssessment(): void {
+        this.submitted = true;
+        this.totalScore = this.state.score;
+        this.correctAnswersCount = Object.values(this.state.answers).filter((answer) => answer.isCorrect).length;
+        this.scorePercentage = this.maxScore > 0 ? Math.round((this.totalScore / this.maxScore) * 100) : 0;
+
+        console.log('[Assessment] finishAssessment()', {
+            totalScore: this.totalScore,
+            maxScore: this.maxScore,
+            scorePercentage: this.scorePercentage,
+            childId: this.childId,
+            difficultyId: this.difficultyId
+        });
+
+        this.submitAssessmentResult();
+    }
+
+
+    private submitAssessmentResult(): void {
+        // محاولة تصحيح القيم قبل الإرسال (حل مشكلة wrong/undefined ids)
+        const queryChildId = this.getNumericQueryParam('childId');
+        const queryDifficultyId = this.getNumericQueryParam('difficultyId');
+
+        const storedChildId = this.getStoredChildId();
+        const storedDifficultyId = this.getStoredDifficultyId();
+
+        const resolvedChildId = queryChildId ?? storedChildId ?? this.childId;
+        const resolvedDifficultyId = queryDifficultyId ?? storedDifficultyId ?? this.difficultyId;
+
+        this.childId = resolvedChildId || 0;
+        this.difficultyId = resolvedDifficultyId || 0;
+
+        console.log('[Assessment] submitAssessmentResult called (resolved ids)', {
+            childId: this.childId,
+            difficultyId: this.difficultyId,
+            totalScore: this.totalScore,
+            queryChildId,
+            queryDifficultyId,
+            storedChildId,
+            storedDifficultyId
+        });
+
+        if (!this.childId || !this.difficultyId) {
+            // مش هنمنع/هنظهر رسالة UI؛ هنستمر لكن request غالبًا سترفض.
+            // الأهم: هنترك errorMessage فارغة عشان لا تظهر.
+            this.submittingResult = false;
+            this.resultSaved = false;
+            this.resultErrorMessage = '';
+            console.warn('[Assessment] submitAssessmentResult blocked (ids missing)', {
+                childId: this.childId,
+                difficultyId: this.difficultyId
+            });
+            return;
+        }
+
+
+
+        this.submittingResult = true;
+        this.resultSaved = false;
+        this.resultErrorMessage = '';
+
+        this.assessmentService
+            .submitAssessmentResult({
+                child_id: this.childId,
+                game_type: String(this.difficultyId),
+                raw_score: this.totalScore
+            })
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: () => {
+                    this.submittingResult = false;
+                    this.resultSaved = true;
+                },
+                error: (error) => {
+                    this.submittingResult = false;
+                    this.resultSaved = false;
+                    this.resultErrorMessage = error?.error?.message || 'تم عرض النتيجة، لكن تعذر حفظها على الخادم';
+                }
+            });
+    }
+
+    private isSpecialQuestion(question: Question): boolean {
+        return this.isVisualQuestion(question) || this.isOrderingQuestion(question);
+    }
+
+    private isSameValue(firstValue: OptionId, secondValue: OptionId): boolean {
+        return String(firstValue) === String(secondValue);
+    }
+
+    private toPositiveNumber(value: unknown, fallback: number): number {
+        const numericValue = Number(value);
+        return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : fallback;
+    }
+
+    private getNumericQueryParam(paramName: string): number | null {
+        const value = Number(this.route.snapshot.queryParamMap.get(paramName));
+        return Number.isFinite(value) && value > 0 ? value : null;
+    }
+
+    private getStoredChildId(): number | null {
+        const fromSelection = this.getLocalStorageNumber('selected_child_id') ?? this.getLocalStorageNumber('child_id');
+        if (fromSelection) {
+            return fromSelection;
+        }
+
+        return this.getQuestionnaireResultNumber(['child_id', 'childId'], ['data.child_id', 'result.child_id']);
+    }
+
+    private getStoredDifficultyId(): number | null {
+        const fromSelection = this.getLocalStorageNumber('selected_difficulty_id') ?? this.getLocalStorageNumber('difficulty_id');
+        if (fromSelection) {
+            return fromSelection;
+        }
+
+        return this.getQuestionnaireResultNumber(['difficulty_id', 'difficultyId', 'learning_difficulty_id'], ['data.difficulty_id', 'data.learning_difficulty_id', 'result.difficulty_id', 'result.learning_difficulty_id']);
+    }
+
+    private getLocalStorageNumber(key: string): number | null {
+        try {
+            const rawValue = localStorage.getItem(key);
+            const value = Number(rawValue);
+            return Number.isFinite(value) && value > 0 ? value : null;
+        } catch {
+            return null;
+        }
+    }
+
+    private getQuestionnaireResultNumber(rootKeys: string[], nestedPaths: string[]): number | null {
+        try {
+            const rawResult = localStorage.getItem('questionnaireResult');
+            if (!rawResult) {
+                return null;
+            }
+
+            const result = JSON.parse(rawResult) as Record<string, unknown>;
+            const paths = [...rootKeys, ...nestedPaths];
+
+            for (const path of paths) {
+                const value = this.readPath(result, path);
+                const numericValue = Number(value);
+
+                if (Number.isFinite(numericValue) && numericValue > 0) {
+                    return numericValue;
+                }
+            }
+
+            return null;
+        } catch {
+            return null;
+        }
+    }
+
+    private readPath(source: Record<string, unknown>, path: string): unknown {
+        return path.split('.').reduce<unknown>((currentValue, key) => {
+            if (currentValue && typeof currentValue === 'object' && key in currentValue) {
+                return (currentValue as Record<string, unknown>)[key];
+            }
+
+            return undefined;
+        }, source);
+    }
+
+    private storeCurrentSelection(): void {
+        try {
+            localStorage.setItem('selected_child_id', String(this.childId));
+            localStorage.setItem('selected_difficulty_id', String(this.difficultyId));
+        } catch {
+            return;
+        }
+    }
+}

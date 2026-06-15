@@ -1,0 +1,17 @@
+services:
+  app:
+    image: php:8.2-cli
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ../AI:/var/www/AI
+    ports:
+      - "8080:8000"
+    command: >
+      sh -c "
+        apt-get update -qq && apt-get install -y -qq libsqlite3-dev sqlite3 &&
+        docker-php-ext-install pdo pdo_sqlite &&
+        php artisan key:generate --force &&
+        php artisan migrate --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "

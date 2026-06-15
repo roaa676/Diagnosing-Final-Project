@@ -1,0 +1,93 @@
+<div class="history-page" dir="rtl">
+    <header class="history-header">
+        <div class="brand-wrap">
+
+            <div class="h-14 w-14 rounded-full flex items-center justify-center">
+                <img src="assets/images/gemini-svg.svg" alt="compass" class="h-10 w-10">
+            </div>
+            <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">بوصلة</span>
+        </div>
+
+        <button
+            pButton
+            type="button"
+            label="رجوع"
+            icon="pi pi-arrow-left"
+            iconPos="right"
+            [text]="true"
+            severity="success"
+            class="header-back-action"
+            routerLink="/dashboard"
+        ></button>
+    </header>
+
+    <section class="page-intro">
+        <h1>سجل النتائج</h1>
+        <p>احدث الأنشطة والتقييمات لطفلك</p>
+    </section>
+
+    <main class="history-grid">
+        <aside class="history-sidebar">
+            <ng-container *ngFor="let item of topicCards; trackBy: trackByTopic">
+                <article class="topic-card"
+                    [ngClass]="['topic-card--' + item.tone, item.featured ? 'topic-card--featured' : '', item.disabled ? 'topic-card--disabled' : '']">
+                    <div class="topic-card__content">
+                        <p-avatar [icon]="item.icon"
+                            [styleClass]="'topic-avatar topic-avatar--' + item.tone"></p-avatar>
+
+                        <div class="topic-card__text">
+                            <h3>{{ item.title }}</h3>
+                            <span>{{ item.subtitle }}</span>
+                        </div>
+
+                        <p-tag [value]="item.badge" [severity]="item.badgeSeverity" styleClass="topic-badge"></p-tag>
+                    </div>
+
+                    <ng-container *ngIf="item.featured">
+                        <p-progressBar [value]="item.progress ?? 0" [showValue]="false"
+                            styleClass="topic-progress"></p-progressBar>
+                        <p class="topic-card__note">{{ item.note }}</p>
+                    </ng-container>
+                </article>
+            </ng-container>
+        </aside>
+
+        <section class="history-main">
+            <div class="summary-grid">
+                <article class="metric-card" *ngFor="let card of summaryCards; trackBy: trackByLabel"
+                    [ngClass]="'metric-card--' + card.tone">
+                    <p-avatar [icon]="card.icon" [styleClass]="'metric-avatar metric-avatar--' + card.tone"></p-avatar>
+
+                    <div class="metric-copy">
+                        <span class="metric-label">{{ card.label }}</span>
+                        <strong class="metric-value">{{ card.value }}</strong>
+                    </div>
+                </article>
+            </div>
+
+            <section class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-copy">
+                        <h2>تطور الأداء العام</h2>
+                        <p>مقارنة التقدم عبر جميع المهارات والصعوبات</p>
+                    </div>
+
+                    <div class="chart-filters">
+                        <button *ngFor="let option of rangeOptions; trackBy: trackByRange" pButton type="button"
+                            [label]="option.label" [ngClass]="getRangeButtonClass(option.value)"
+                            (click)="setRange(option.value)"></button>
+                    </div>
+                </div>
+
+                <div class="chart-canvas-wrap">
+                    <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+                </div>
+
+                <div class="chart-legend">
+                    <span class="chart-legend__dot"></span>
+                    <span>نتائج التدريبات</span>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
