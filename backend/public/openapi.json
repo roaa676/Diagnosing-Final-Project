@@ -1,0 +1,401 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Bowsla Chatbot API — بوصلة",
+    "description": "مساعد بوصلة الذكي لأولياء الأمور. يشرح نتائج الأطفال بالعربية ويوصي بتمارين مناسبة.\n\n**تنبيه:** جميع الردود بالعربية. المساعد لا يُشخّص طبياً.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Bowsla Platform",
+      "email": "support@bowsla.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/api",
+      "description": "Local Dev Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "تسجيل الدخول للحصول على الـ Token"
+    },
+    {
+      "name": "Chatbot",
+      "description": "مساعد بوصلة الذكي — جميع الردود بالعربية"
+    },
+    {
+      "name": "Children",
+      "description": "إدارة بيانات الأطفال"
+    },
+    {
+      "name": "Reports",
+      "description": "التقارير الشاملة"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "تسجيل الدخول",
+        "description": "احصل على Bearer Token لاستخدام endpoints المحمية",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "parent@bowsla.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "تسجيل دخول ناجح",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string", "example": "1|abc123xyz..." },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "example": 1 },
+                        "name": { "type": "string", "example": "أحمد محمد" },
+                        "email": { "type": "string", "example": "parent@bowsla.com" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chatbot/ask": {
+      "post": {
+        "tags": ["Chatbot"],
+        "summary": "سؤال حر من ولي الأمر",
+        "description": "اسأل المساعد أي سؤال عن نتيجة طفلك أو صعوبات التعلم.\n\n**أمثلة:**\n- `يعني إيه انعكاس مرآتي؟`\n- `أعمل إيه في البيت؟`\n- `هل ابني عنده ديسلكسيا؟`",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AskRequest" },
+              "examples": {
+                "mirroring_question": {
+                  "summary": "سؤال عن الانعكاس المرآتي",
+                  "value": {
+                    "child_id": 1,
+                    "message": "يعني إيه انعكاس مرآتي؟"
+                  }
+                },
+                "diagnosis_question": {
+                  "summary": "سؤال عن التشخيص",
+                  "value": {
+                    "child_id": 1,
+                    "message": "هل ابني عنده ديسلكسيا؟"
+                  }
+                },
+                "home_exercises": {
+                  "summary": "طلب تمارين منزلية",
+                  "value": {
+                    "child_id": 1,
+                    "message": "أعمل إيه في البيت عشان أساعده؟"
+                  }
+                },
+                "number_reversal": {
+                  "summary": "سؤال عن الأرقام",
+                  "value": {
+                    "child_id": 1,
+                    "message": "ليه بيخلط بين 12 و21؟"
+                  }
+                },
+                "no_context": {
+                  "summary": "سؤال عام بدون child_id",
+                  "value": {
+                    "message": "ما هي أعراض عسر القراءة؟"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "رد المساعد بالعربية",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChatbotTextResponse" },
+                "example": {
+                  "status": "success",
+                  "answer": "الانعكاس المرآتي يعني أن الطفل يخلط أحيانًا بين الحروف أو الأرقام التي تبدو كأنها انعكست في المرآة، مثل b وd، أو بطة وطبة. هذا شائع جداً في مرحلة التعلم الأولى ويتحسن مع التدريب."
+                }
+              }
+            }
+          },
+          "401": { "description": "غير مصرح — يجب تسجيل الدخول أولاً" },
+          "422": { "description": "بيانات غير صحيحة" }
+        }
+      }
+    },
+    "/chatbot/explain-result": {
+      "post": {
+        "tags": ["Chatbot"],
+        "summary": "شرح نتيجة الطفل الكاملة",
+        "description": "يُعيد شرحاً عربياً كاملاً لنتائج الطفل في جميع المهارات المقاسة، مع توصيات عامة.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResultRequest" },
+              "examples": {
+                "latest_result": {
+                  "summary": "آخر نتيجة للطفل",
+                  "value": { "child_id": 1 }
+                },
+                "specific_result": {
+                  "summary": "نتيجة محددة بالـ ID",
+                  "value": { "child_id": 1, "result_id": 5 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "شرح عربي كامل للنتيجة",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChatbotTextResponse" },
+                "example": {
+                  "status": "success",
+                  "answer": "بناءً على أداء الطفل داخل منصة بوصلة، إليك شرح مبسّط للنتائج:\n\n**مهارة الانعكاس المرآتي للحروف والكلمات (42/100):**\nتظهر في هذه المهارة مؤشرات تستدعي الانتباه. لاحظنا أن الطفل وقع في بعض الأخطاء عند التمييز بين رموز متعاكسة مثل b وd، أو ترتيب كلمات مثل بطة وطبة.\n\n*هذه نتيجة مبدئية مبنية على أداء الطفل داخل المنصة، وليست تشخيصًا طبيًا نهائيًا.*"
+                }
+              }
+            }
+          },
+          "403": { "description": "غير مصرح — الطفل لا ينتمي لهذا الحساب" },
+          "422": { "description": "لا توجد نتائج كافية — أكمل الاختبارات أولاً" }
+        }
+      }
+    },
+    "/chatbot/recommend-exercises": {
+      "post": {
+        "tags": ["Chatbot"],
+        "summary": "توصية تمارين مخصصة للطفل",
+        "description": "يُعيد قائمة تمارين منزلية مخصصة بناءً على نتائج الطفل، مع تصنيف كل مهارة ومستوى التدريب الموصى به.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResultRequest" },
+              "examples": {
+                "latest_result": {
+                  "summary": "توصية بناءً على آخر نتيجة",
+                  "value": { "child_id": 1 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "قائمة التمارين الموصى بها",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExerciseResponse" },
+                "example": {
+                  "status": "success",
+                  "answer": "أحسنت على اهتمامك! إليك خطة تمارين مقترحة:\n\n**الانعكاس المرآتي — المستوى 1:**\n- تدريبات يمين / يسار\n- مطابقة الحرف مع اتجاهه الصحيح\n- ترتيب حروف الكلمة",
+                  "recommended_exercises": [
+                    {
+                      "skill_id": "dyslexia_mirroring",
+                      "arabic_name": "الانعكاس المرآتي للحروف والكلمات",
+                      "training_level": 1,
+                      "exercises": [
+                        {
+                          "name": "تدريبات يمين / يسار",
+                          "description": "العب مع الطفل ألعاب تحديد الاتجاهات في الحياة اليومية",
+                          "materials": "أشياء منزلية"
+                        },
+                        {
+                          "name": "مطابقة الحرف مع اتجاهه الصحيح",
+                          "description": "ضع بطاقتين إحداهما صحيحة والأخرى معكوسة واطلب الاختيار",
+                          "materials": "بطاقات حروف"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": { "description": "غير مصرح" },
+          "422": { "description": "لا توجد نتائج كافية" }
+        }
+      }
+    },
+    "/children": {
+      "get": {
+        "tags": ["Children"],
+        "summary": "عرض الأطفال المسجلين",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "قائمة الأطفال",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    { "id": 1, "name": "محمد", "age": 7 }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/child/{child_id}/report": {
+      "get": {
+        "tags": ["Reports"],
+        "summary": "التقرير الشامل للطفل",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "child_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "example": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "التقرير الشامل",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "success",
+                  "child_info": { "name": "محمد", "age": "7 سنوات" },
+                  "assessments": {
+                    "game_performance": {
+                      "game_type": "visual_discrimination",
+                      "risk_level": "Moderate Risk",
+                      "z_score": -1.2
+                    }
+                  },
+                  "final_conclusion": "حالة متوسطة: يُنصح بزيادة الأنشطة التفاعلية."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "أضف الـ Token هنا بعد تسجيل الدخول من /login"
+      }
+    },
+    "schemas": {
+      "AskRequest": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "child_id": {
+            "type": "integer",
+            "description": "اختياري — إذا أُدرج يُضاف سياق نتيجة الطفل للسؤال",
+            "example": 1
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "سؤال ولي الأمر بالعربية",
+            "example": "يعني إيه انعكاس مرآتي؟"
+          }
+        }
+      },
+      "ResultRequest": {
+        "type": "object",
+        "required": ["child_id"],
+        "properties": {
+          "child_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "result_id": {
+            "type": "integer",
+            "description": "اختياري — إذا حُذف يُستخدم آخر نتيجة",
+            "example": 5
+          }
+        }
+      },
+      "ChatbotTextResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["success", "error"],
+            "example": "success"
+          },
+          "answer": {
+            "type": "string",
+            "description": "الرد العربي من المساعد",
+            "example": "بناءً على أداء الطفل..."
+          }
+        }
+      },
+      "ExerciseResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "success" },
+          "answer": { "type": "string", "example": "إليك خطة التمارين..." },
+          "recommended_exercises": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "skill_id": { "type": "string", "example": "dyslexia_mirroring" },
+                "arabic_name": { "type": "string", "example": "الانعكاس المرآتي للحروف والكلمات" },
+                "training_level": { "type": "integer", "example": 1 },
+                "exercises": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "description": { "type": "string" },
+                      "materials": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

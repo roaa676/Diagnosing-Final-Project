@@ -1,0 +1,67 @@
+<div class="auth-wrapper">
+
+
+  <div class="right-section">
+    <div class="welcome-content">
+      <img src="assets/images/LoginIMG.png" alt="طفل يتعلم">
+      <h2>
+        رحلة تعلم ممتعة<br>
+        <span class="highlight-text">تبدأ من هنا</span>
+      </h2>
+      <p>
+        بوصلة يساعدك في فهم طفلك بشكل أفضل وتشخيص صعوبات
+        التعلم بطرق علمية مبسطة ومُريحة.
+      </p>
+    </div>
+  </div>
+
+
+  <div class="left-section">
+    <div class="form-container">
+
+      <h2 class="title">تسجيل الدخول</h2>
+      <p class="subtitle">
+        تسجيل لأول مرة؟
+        <a routerLink="/auth/register">إنشاء حساب</a>
+      </p>
+
+      <form (ngSubmit)="login()">
+
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <span class="p-input-icon-left custom-input">
+            <i class="pi pi-user"></i>
+            <input pInputText [(ngModel)]="email" name="email" placeholder="البريد الإلكتروني" />
+          </span>
+        </div>
+
+        <div class="field">
+          <label>اسم الطفل</label>
+          <span class="p-input-icon-left custom-input">
+            <i class="pi pi-user"></i>
+            <input pInputText [(ngModel)]="childName" name="childName" placeholder="اسم الطفل" />
+          </span>
+        </div>
+
+        <div class="field">
+          <label>كلمة السر</label>
+          <p-password [(ngModel)]="password" name="password" [feedback]="false" [toggleMask]="true"
+            placeholder="••••••••">
+          </p-password>
+        </div>
+
+        <div class="extra-links">
+          <a routerLink="/auth/register">إنشاء حساب جديد</a>
+          <a href="#" class="forgot-link">نسيت كلمة السر؟</a>
+        </div>
+
+        <button pButton type="submit" label="تسجيل الدخول" class="login-btn" [disabled]="isLoading" [loading]="isLoading">
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,129 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top right, rgba(46, 204, 113, 0.08), transparent 32%),
+        radial-gradient(circle at top left, rgba(36, 138, 210, 0.06), transparent 30%),
+        #f7f9f6;
+}
+
+.training-page {
+    direction: rtl;
+    width: min(1380px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 56px 0 80px;
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+}
+
+/* ===== العنوان ===== */
+.training-hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.training-hero h1 {
+    margin: 0 0 10px;
+    font-size: clamp(2.7rem, 5vw, 4.4rem);
+    font-weight: 800;
+    color: #111827;
+}
+
+.training-hero p {
+    margin: 0 auto;
+    max-width: 780px;
+    color: #6b8b75;
+    font-size: 1.1rem;
+    line-height: 1.85;
+}
+
+.training-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    align-items: stretch;
+}
+
+.training-card {
+    appearance: none;
+    -webkit-appearance: none;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 430px;
+    padding: 0;
+    background: #fff;
+    border-radius: 34px;
+    overflow: hidden;
+    border: 1px solid rgba(17, 24, 39, 0.05);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: right;
+}
+
+.training-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
+}
+
+.card-media {
+    width: 100%;
+    height: 228px;
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+
+.card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+}
+
+.card-body {
+    flex: 1;
+    padding: 18px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.card-body h2 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 10px;
+    text-align: right;
+}
+
+.card-body p {
+    font-size: 1rem;
+    color: #6b8b75;
+    line-height: 1.9;
+    text-align: right;
+}
+
+@media (max-width: 992px) {
+    .training-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .training-page {
+        width: min(100% - 20px, 1380px);
+    }
+
+    .training-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .training-card {
+        min-height: 400px;
+    }
+
+    .card-media {
+        height: 210px;
+    }
+}
