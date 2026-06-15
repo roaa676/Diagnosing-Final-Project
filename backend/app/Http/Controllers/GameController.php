@@ -11,6 +11,7 @@ use App\Services\DiagnosisService;
 
 class GameController extends Controller
 {
+
     // 1. تعريف المتغيرات ودالة البناء
     protected DiagnosisService $diagnosisService;
 
@@ -22,19 +23,20 @@ class GameController extends Controller
     // 2. دالة جلب الاختبار الشامل للتشخيص (تسحب أسئلة الـ assessment فقط)
     public function getAssessmentContent(int $difficulty_id)
     {
-        // هنجيب مستويات التقييم بس للصعوبة دي مرتبة تصاعدياً
         $levels = GameContent::where('learning_difficulty_id', $difficulty_id)
-                    ->where('content_type', 'assessment') // 💡 التعديل هنا: أسئلة تقييم فقط
-                    ->orderBy('difficulty_level', 'asc')
-                    ->get();
+                            ->where('content_type', 'assessment')
+                            ->orderBy('difficulty_level', 'asc')
+                            ->get();
 
         if ($levels->isEmpty()) {
-            return response()->json(['status' => 'error', 'message' => 'لا يوجد محتوى تقييم لهذا الاختبار'], 404);
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'لا يوجد محتوى تقييم لهذا الاختبار'
+            ], 404);
         }
 
         $assessmentLevels = [];
 
-        // بنمشي على كل مستوى ونجهز أسئلته لوحدها
         foreach ($levels as $level) {
             $data = json_decode($level->content_data, true);
             
@@ -43,15 +45,14 @@ class GameController extends Controller
                 $shuffledQuestions = collect($data['questions'])->shuffle()->take(8)->map(function ($question) use ($difficulty_id, $level) {
                     
                     // لخبطة الاختيارات
-                    if ($difficulty_id == 1 && isset($question['options'])) {
-                        $question['options'] = collect($question['options'])->shuffle()->toArray();
+                    if (isset($question['options']) && is_array($question['options'])) {
+                        $question['options'] = collect($question['options'])->shuffle()->values()->all();
                     }
                     
                     $question['difficulty_level'] = $level->difficulty_level; 
                     return $question;
                 });
 
-                // تجميع الداتا كـ "بلوك" كامل لكل مستوى
                 $assessmentLevels[] = [
                     'difficulty_level' => $level->difficulty_level,
                     'level_name' => $level->level_name,
@@ -62,7 +63,7 @@ class GameController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'assessment_data' => $assessmentLevels // مصفوفة متدرجة من المستويات
+            'data' => $assessmentLevels
         ]);
     }
 
@@ -97,7 +98,47 @@ class GameController extends Controller
             'status' => 'success',
             'level_name' => $gameContent->level_name,
             'difficulty_level' => $gameContent->difficulty_level,
-            'questions' => $randomizedQuestions->values()->all() // إرجاع أسئلة التدريب (8 عشوائيين)
+            'questions' => $randomizedQuestions->values()->all(),
+            'data' => $randomizedQuestions->values()->all()
+        ]);
+    }
+
+    /**
+     * 3.1 دالة جلب آخر نتيجة assessment محفوظة للطفل لنفس game_type (difficulty_id)
+     */
+    public function getAssessmentResult(Request $request, int $child_id)
+    {
+        $request->validate([
+            'game_type' => 'required|string'
+        ]);
+
+        $gameType = $request->query('game_type');
+
+        // لازم نتحقق إن الطفل تابع للمستخدم الحالي
+        $child = Child::where('id', $child_id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (!$child) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized access'], 403);
+        }
+
+        $result = GameResult::where('child_id', $child->id)
+            ->where('game_type', $gameType)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $result
+                ? [
+                    'raw_score' => $result->raw_score,
+                    'z_score' => $result->z_score,
+                    'risk_level' => $result->risk_level,
+                    'created_at' => $result->created_at,
+                    'id' => $result->id,
+                ]
+                : null,
         ]);
     }
 
@@ -155,7 +196,7 @@ class GameController extends Controller
             [
                 'current_level' => $startingLevel,
                 'progress_percentage' => $startingPercentage,
-                'next_level_unlocks_at' => now(), // يقدر يبدأ التدريب فوراً
+                'next_level_unlocks_at' => now(), // يقدر يبدأ التدريب فورماً
             ]
         );
 
@@ -169,3 +210,4 @@ class GameController extends Controller
         ], 201);
     }
 }
+

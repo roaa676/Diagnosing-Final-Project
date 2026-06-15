@@ -1,12 +1,9 @@
-<!-- Floating bubble -->
 <button class="chat-bubble" (click)="toggleChat()" [class.active]="isOpen" title="مساعد بوصلة">
   <i class="pi" [class.pi-comments]="!isOpen" [class.pi-times]="isOpen"></i>
 </button>
 
-<!-- Chat panel -->
 <div class="chat-panel" [class.open]="isOpen" dir="rtl">
 
-  <!-- Header -->
   <div class="chat-header">
     <div class="chat-header-info">
       <div class="chat-avatar">🧭</div>
@@ -16,7 +13,6 @@
       </div>
     </div>
     <div class="chat-header-actions">
-      <!-- Reset button — always visible when there are messages -->
       <button
         *ngIf="messages.length > 0"
         class="header-btn reset-btn"
@@ -31,7 +27,6 @@
     </div>
   </div>
 
-  <!-- Welcome screen (no messages yet) -->
   <div class="welcome-screen" *ngIf="messages.length === 0">
     <div class="welcome-msg">
       أهلاً! أنا مساعد بوصلة 🧭<br>
@@ -48,7 +43,6 @@
     </div>
   </div>
 
-  <!-- Messages -->
   <div class="chat-messages" #messagesContainer *ngIf="messages.length > 0">
     <div *ngFor="let msg of messages"
          class="msg-row"
@@ -61,7 +55,6 @@
       </div>
     </div>
 
-    <!-- Typing indicator -->
     <div class="msg-row assistant" *ngIf="isLoading">
       <div class="msg-bubble assistant-bubble typing">
         <span></span><span></span><span></span>
@@ -69,14 +62,12 @@
     </div>
   </div>
 
-  <!-- Suggested questions (during conversation) -->
   <div class="suggestions-bar" *ngIf="messages.length > 0 && !isLoading">
     <button class="sugg-btn" (click)="quickAsk('أعمل إيه في البيت؟')">تمارين منزلية</button>
     <button class="sugg-btn" (click)="quickAsk('هل ابني محتاج متخصص؟')">متى أستشير متخصص؟</button>
     <button class="sugg-btn" (click)="quickAsk('ايه علامات صعوبات التعلم؟')">علامات الصعوبة</button>
   </div>
 
-  <!-- Input -->
   <div class="chat-input-area">
     <input
       class="chat-input"

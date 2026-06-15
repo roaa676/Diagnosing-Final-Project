@@ -1,0 +1,107 @@
+<div class="questionnaire-container" dir="rtl">
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="success-modal">
+    <div class="success-content">
+      <div class="success-icon">✓</div>
+      <h2>تم الإرسال بنجاح!</h2>
+      <p>شكراً لك على إكمال الاستبيان. الخطوات التالية هي تقييم الطفل عبر مجموعة من الألعاب والأنشطة المعتمدة.</p>
+      <button class="btn-success" (click)="navigateToAssessment()">
+        <span>الانتقال لتقييم الطفل</span>
+        <span class="icon">🎯</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Questionnaire Form -->
+  <div *ngIf="!successMessage" class="questionnaire-content">
+    <!-- Header -->
+    <div class="questionnaire-header">
+      <div class="header-top">
+        <span class="step-indicator">بوصلة ✓</span>
+        <span class="skip-button" (click)="resetQuestionnaire()">تخطي</span>
+      </div>
+      <h1>استبيان ولي الأمر</h1>
+      <p class="subtitle">برجاء الإجابة بدقة للمساعدة في تشخيص حالة الطفل.</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <span class="progress-label">التقدم في الاستبيان</span>
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar" [style.width.%]="progressPercentage"></div>
+      </div>
+      <span class="progress-percentage">{{ progressPercentage }}%</span>
+    </div>
+
+    <!-- Questions Table -->
+    <div class="questions-table">
+      <div class="table-header">
+        <div class="col-question">السؤال</div>
+        <div class="col-answer nope">نعم</div>
+        <div class="col-answer sometimes">أحياناً</div>
+        <div class="col-answer no">لا</div>
+      </div>
+
+      <div class="table-rows">
+        <div *ngFor="let question of questions; let i = index" class="table-row">
+          <div class="col-question">{{ question.text }}</div>
+          <div class="col-answer nope">
+            <input 
+              type="radio" 
+              [name]="'q' + question.id" 
+              [value]="2"
+              [checked]="getAnswerValue(question.id) === 2"
+              (change)="selectAnswer(question.id, 2)"
+              class="radio-input">
+          </div>
+          <div class="col-answer sometimes">
+            <input 
+              type="radio" 
+              [name]="'q' + question.id" 
+              [value]="1"
+              [checked]="getAnswerValue(question.id) === 1"
+              (change)="selectAnswer(question.id, 1)"
+              class="radio-input">
+          </div>
+          <div class="col-answer no">
+            <input 
+              type="radio" 
+              [name]="'q' + question.id" 
+              [value]="0"
+              [checked]="getAnswerValue(question.id) === 0"
+              (change)="selectAnswer(question.id, 0)"
+              class="radio-input">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning Message -->
+    <div class="warning-box">
+      <span class="warning-icon">⚠️</span>
+      <span class="warning-text">تحذير: للحصول على تشخيص أدق للطفل برجاء إكمال الاستبيان كاملاً والألعاب والأنشطة المعتمدة.</span>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button 
+        class="btn btn-secondary" 
+        (click)="resetQuestionnaire()"
+        [disabled]="loading">
+        إلغاء الاستبيان
+      </button>
+      <button 
+        class="btn btn-primary" 
+        (click)="submitAnswers()"
+        [disabled]="!isAllAnswered() || loading">
+        <span *ngIf="!loading">إرسال الإجابات</span>
+        <span *ngIf="loading">جاري الإرسال...</span>
+      </button>
+    </div>
+  </div>
+</div>

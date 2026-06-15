@@ -1,0 +1,76 @@
+<div class="game-container">
+    <!-- شريط التقدم العلوي -->
+    <div class="game-header">
+        <button (click)="goBack()" class="back-btn">
+            <i class="pi pi-arrow-right"></i>
+            خروج
+        </button>
+        <div class="progress-wrapper">
+            <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="progressPercent"></div>
+            </div>
+            <span class="progress-text">السؤال {{ currentQuestionIndex + 1 }} من {{ questions.length }}</span>
+        </div>
+    </div>
+
+    <!-- حالة التحميل -->
+    <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>جاري تحضير التمرين يا بطل...</p>
+    </div>
+
+    <!-- رسالة الخطأ -->
+    <div *ngIf="errorMessage" class="error-state">
+        <i class="pi pi-exclamation-circle"></i>
+        <p>{{ errorMessage }}</p>
+        <button (click)="goBack()" class="btn-primary">العودة للمستويات</button>
+    </div>
+
+    <!-- منطقة السؤال -->
+    <div *ngIf="!loading && !errorMessage && currentQuestion" class="question-card">
+        <div class="question-content">
+            <h2 class="question-text">{{ currentQuestion.question }}</h2>
+            
+            <!-- دعم الصوت -->
+            <div *ngIf="currentQuestion.audio_url" class="audio-player">
+                <button (click)="playAudio(currentQuestion.audio_url)" class="audio-btn" [class.playing]="playingAudio">
+                    <i [class]="playingAudio ? 'pi pi-volume-up' : 'pi pi-volume-down'"></i>
+                    استمع للسؤال
+                </button>
+            </div>
+
+            <!-- دعم الصور -->
+            <div *ngIf="currentQuestion.image_url" class="question-image">
+                <img [src]="currentQuestion.image_url" alt="صورة السؤال">
+            </div>
+        </div>
+
+        <!-- الخيارات -->
+        <div class="options-grid" [class.visual-grid]="isVisualQuestion(currentQuestion)">
+            <div *ngFor="let option of currentQuestion.options" 
+                 class="option-card"
+                 [class.selected]="isSelected(option.id)"
+                 (click)="selectOption(option.id)">
+                
+                <div *ngIf="option.image" class="option-image">
+                    <img [src]="option.image" alt="خيار">
+                </div>
+                <span class="option-text">{{ option.text }}</span>
+                
+                <div class="selection-indicator">
+                    <i class="pi pi-check" *ngIf="isSelected(option.id)"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- أزرار التحكم السفلى -->
+        <div class="game-footer">
+            <button class="next-btn" 
+                    [disabled]="selectedOption === null"
+                    (click)="next()">
+                {{ isLastQuestion ? 'إنهاء التدريب' : 'السؤال التالي' }}
+                <i class="pi pi-arrow-left"></i>
+            </button>
+        </div>
+    </div>
+</div>

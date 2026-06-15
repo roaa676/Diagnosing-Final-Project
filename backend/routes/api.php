@@ -33,11 +33,16 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/difficulties', [LearningDifficultyController::class, 'index']);
 Route::get('/difficulties/{id}/questions', [LearningDifficultyController::class, 'getQuestions']);
 
+// --- 4. نظام التقييم والتشخيص (Assessment) ---
+// خليه Public علشان Angular يقدر يجيب الأسئلة بدون توكن
+Route::get('/assessment-content/{difficulty_id}', [GameController::class, 'getAssessmentContent']);
+
 
 // ==========================================
 // ثانياً: المسارات المحمية (auth:sanctum - تتطلب Token)
 // ==========================================
 Route::middleware('auth:sanctum')->group(function () {
+
 
     // --- 1. إدارة الملف الشخصي للأب ---
     Route::prefix('user')->group(function () {
@@ -59,9 +64,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/child/{child_id}/history', [QuestionnaireController::class, 'getChildHistory']);
 
     // --- 4. نظام التقييم والتشخيص (Assessment) ---
-    // 💡 ضفنا راوت التقييم اللي كان ناقص
-    Route::get('/assessment-content/{difficulty_id}', [GameController::class, 'getAssessmentContent']);
     Route::post('/submit-game-result', [GameController::class, 'submitGameResult']);
+    Route::get('/assessment-result/{child_id}', [GameController::class, 'getAssessmentResult']);
+
+
+
+
+
+
 
     // --- 5. نظام التدريب اليومي (Training) ---
     // 💡 دخلناهم جوه الحماية عشان محدش يلعب في التدريب غير الطفل المسجل
