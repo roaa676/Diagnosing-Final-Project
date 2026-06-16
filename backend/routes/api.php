@@ -54,7 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/training/roadmap/{child_id}', [TrainingController::class, 'getTrainingRoadmap']);
     Route::get('/game-content/{difficulty_id}/{level}', [GameController::class, 'getGameContent']); 
     Route::post('/training/complete', [TrainingController::class, 'completeTrainingLevel']);
-
+    Route::post('/training/update-time', [TrainingController::class, 'updateDailyTime']);
     Route::get('/child/{child_id}/report', [ReportController::class, 'getComprehensiveReport']);
 
     Route::prefix('admin')->group(function () {
