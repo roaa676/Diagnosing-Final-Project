@@ -10,23 +10,22 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up()
-{
-    Schema::create('questionnaires', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('child_id')->constrained('children')->onDelete('cascade'); // ربط الاستبيان بالطفل
-        
-        // إجابات الأسئلة اللي في الواجهة عندك (0 = لا، 1 = أحياناً، 2 = نعم)
-        $table->tinyInteger('q1_reading_aloud')->default(0); 
-        $table->tinyInteger('q2_confusing_letters')->default(0); 
-        $table->tinyInteger('q3_forgetting_instructions')->default(0); 
-        $table->tinyInteger('q4_avoiding_reading')->default(0); 
-        
-        // السكور الكلي عشان نطلع منه مؤشر الخطر المبدئي
-        $table->integer('total_risk_score')->default(0); 
-        
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('questionnaires', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('child_id')->constrained('children')->onDelete('cascade');
+            
+            // ضفنا نوع الصعوبة عشان نربط الاستبيان بعسر القراءة أو الحساب
+            $table->foreignId('learning_difficulty_id')->constrained('learning_difficulties')->onDelete('cascade'); 
+            
+            // السطر ده السحري: هيحفظ أي عدد من الإجابات مهما كان (بدل الـ 4 عواميد القديمة)
+            $table->json('responses_json')->nullable(); 
+            
+            $table->integer('total_risk_score')->default(0); 
+            
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

@@ -6,27 +6,43 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Child;
 use App\Models\Questionnaire;
+use App\Models\GameResult; // ضفنا ده عشان نجيب نتيجة اللعبة
+use App\Models\LearningDifficulty; // لو حبيت تعرض إحصائيات الصعوبات
 
 class AdminController extends Controller
 {
     /**
-     * جلب إحصائيات لوحة التحكم (تم تغيير الاسم ليتوافق مع الرابط في Postman)
+     * جلب إحصائيات لوحة التحكم (مدمجة مع مصفوفة القرار الذكية)
      */
     public function getStats()
     {
-        // 1. إجمالي عدد أولياء الأمور (المستخدمين)
+        // 1. إحصائيات عامة
         $totalParents = User::count();
-
-        // 2. إجمالي عدد الأطفال المسجلين
         $totalChildren = Child::count();
-
-        // 3. عدد حالات الخطر المرتفع (High Risk)
         $highRiskCount = Questionnaire::where('risk_level', 'High Risk')->count();
-
-        // 4. نسبة الحالات المصابة (تقريبية)
         $riskRate = $totalChildren > 0 ? round(($highRiskCount / $totalChildren) * 100, 2) : 0;
 
-        // 5. آخر 5 عمليات تقييم حصلت (مع اسم الطفل)
+        // 2. تحليل مصفوفة القرار (Decision Matrix Analytics)
+        $confirmedCases = 0;
+        $unnoticedCases = 0; 
+        $attentionNeededCases = 0;
+
+        $childrenIds = Child::pluck('id');
+        foreach ($childrenIds as $childId) {
+            $latestQ = Questionnaire::where('child_id', $childId)->latest()->first();
+            $latestG = GameResult::where('child_id', $childId)->latest()->first();
+
+            if ($latestQ && $latestG) {
+                $q_is_high = in_array($latestQ->risk_level, ['High Risk', 'Moderate Risk']);
+                $g_is_high = in_array($latestG->risk_level, ['High Risk', 'Moderate Risk']);
+
+                if ($q_is_high && $g_is_high) $confirmedCases++;
+                elseif (!$q_is_high && $g_is_high) $unnoticedCases++;
+                elseif ($q_is_high && !$g_is_high) $attentionNeededCases++;
+            }
+        }
+
+        // 3. آخر 5 عمليات تقييم (استبيان)
         $latestAssessments = Questionnaire::with('child')
             ->latest()
             ->take(5)
@@ -43,11 +59,18 @@ class AdminController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
-                'total_parents'        => $totalParents,
-                'total_children'       => $totalChildren,
-                'high_risk_cases'      => $highRiskCount,
-                'risk_rate_percentage' => $riskRate . '%',
-                'latest_assessments'   => $latestAssessments
+                'summary' => [
+                    'total_parents'        => $totalParents,
+                    'total_children'       => $totalChildren,
+                    'high_risk_cases'      => $highRiskCount,
+                    'risk_rate_percentage' => $riskRate . '%',
+                ],
+                'decision_matrix' => [
+                    'confirmed_cases'  => $confirmedCases, // صعوبة مؤكدة (لعبة واستبيان)
+                    'unnoticed_cases'  => $unnoticedCases, // مشكلة غير ملحوظة (لعبة فقط)
+                    'attention_needed' => $attentionNeededCases, // تشتت انتباه (استبيان فقط)
+                ],
+                'latest_assessments' => $latestAssessments
             ]
         ]);
     }
@@ -57,16 +80,20 @@ class AdminController extends Controller
      */
     public function getAllChildrenWithStatus()
     {   
-        // جلب كل الأطفال مع بيانات الأب وآخر تقييم
+        // جلب كل الأطفال مع بيانات الأب
         $children = Child::with(['user', 'latestQuestionnaire'])->get();
 
         $data = $children->map(function($child) {
+            // هنجيب نتيجة اللعبة كمان عشان الجدول يكون كامل
+            $latestGame = GameResult::where('child_id', $child->id)->latest()->first();
+
             return [
                 'child_id'             => $child->id,
                 'child_name'           => $child->name,
                 'parent_name'          => $child->user->name ?? 'غير معروف',
                 'age'                  => $child->age,
-                'last_risk_level'      => $child->latestQuestionnaire->risk_level ?? 'لم يتم التقييم',
+                'questionnaire_risk'   => $child->latestQuestionnaire->risk_level ?? 'لم يتم التقييم',
+                'game_risk'            => $latestGame->risk_level ?? 'لم يلعب بعد',
                 'last_score'           => $child->latestQuestionnaire->total_risk_score ?? 0,
                 'last_assessment_date' => $child->latestQuestionnaire ? $child->latestQuestionnaire->created_at->format('Y-m-d') : '---',
             ];

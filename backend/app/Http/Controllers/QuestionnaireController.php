@@ -1,36 +1,33 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api; // لاحظ مسار الـ Api
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Questionnaire;
 use App\Models\Child;
+use App\Models\GameResult; // ضفنا ده عشان مصفوفة القرار
 use App\Services\DiagnosisService;
 
 class QuestionnaireController extends Controller
 {
     protected DiagnosisService $diagnosisService;
 
-    // حقن السيرفس في الكنترولر عشان نستخدمها في كل الدوال
     public function __construct(DiagnosisService $diagnosisService)
     {
         $this->diagnosisService = $diagnosisService;
     }
 
-    // 1. استقبال وحفظ إجابات الاستبيان
+    // 1. استقبال وحفظ إجابات الاستبيان بشكل ديناميكي
     public function store(Request $request)
     {
-        // 💡 تم إضافة learning_difficulty_id هنا عشان الـ Validation
         $request->validate([
             'child_id' => 'required|exists:children,id',
             'learning_difficulty_id' => 'required|integer', 
-            'q1_reading_aloud' => 'required|integer|in:0,1,2',
-            'q2_confusing_letters' => 'required|integer|in:0,1,2',
-            'q3_forgetting_instructions' => 'required|integer|in:0,1,2',
-            'q4_avoiding_reading' => 'required|integer|in:0,1,2',
+            'answers' => 'required|array', // بنستقبل الإجابات كمصفوفة عشان تقبل الـ 8 أسئلة
+            'answers.*' => 'required|integer' // قيم الإجابات
         ]);
 
-        // الحماية: التأكد إن الطفل يخص المستخدم الحالي
         $child = Child::where('id', $request->child_id)
                       ->where('user_id', $request->user()->id)
                       ->first();
@@ -39,89 +36,82 @@ class QuestionnaireController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthorized access'], 403);
         }
 
-        // حساب السكور الإجمالي
-        $total_score = $request->q1_reading_aloud + 
-                       $request->q2_confusing_letters + 
-                       $request->q3_forgetting_instructions + 
-                       $request->q4_avoiding_reading;
+        // حساب السكور الإجمالي بجمع كل الإجابات أياً كان عددها
+        $total_score = array_sum($request->answers);
 
-        // استخدام السيرفس لتحديد مستوى الخطر
-        // 💡 تم تصليح السطر ده واستخدام learning_difficulty_id
+        // تحديد مستوى الخطر للاستبيان
         $risk_level = $this->diagnosisService->getRiskLevel($total_score, $request->learning_difficulty_id);
 
-        // حفظ الاستبيان
+        // حفظ الاستبيان (لاحظ إننا بنحفظ الـ total والـ level بس أو ممكن تحفظ الـ answers كـ JSON لو ضفت الحقل ده في الداتا بيز)
         $questionnaire = Questionnaire::create([
             'child_id' => $child->id,
-            'q1_reading_aloud' => $request->q1_reading_aloud,
-            'q2_confusing_letters' => $request->q2_confusing_letters,
-            'q3_forgetting_instructions' => $request->q3_forgetting_instructions,
-            'q4_avoiding_reading' => $request->q4_avoiding_reading,
+            'learning_difficulty_id' => $request->learning_difficulty_id,
             'total_risk_score' => $total_score,
             'risk_level' => $risk_level,
+            // 'answers_json' => json_encode($request->answers) // لو حابب تحفظ تفاصيل إجابات ولي الأمر
         ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'تم حفظ التقييم بنجاح',
+            'message' => 'تم حفظ التقييم المبدئي بنجاح',
             'risk_level' => $risk_level,
-            'recommendation' => $this->diagnosisService->getRecommendation($risk_level),
             'data' => $questionnaire
         ], 201);
     }
 
-    // 2. عرض نتائج الاستبيان لطفل معين
-    public function showResults(Request $request, int $child_id)
+    // 2. مصفوفة القرار (التقرير الذكي اللي بيقارن الاستبيان باللعبة)
+    public function generateSmartReport(Request $request, int $child_id, int $difficulty_id)
     {
-        $child = Child::where('id', $child_id)
-                      ->where('user_id', $request->user()->id)
-                      ->first();
+        // حماية
+        $child = Child::where('id', $child_id)->where('user_id', $request->user()->id)->first();
+        if (!$child) return response()->json(['status' => 'error', 'message' => 'Unauthorized access'], 403);
 
-        if (!$child) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized access'], 403);
+        // جلب أحدث استبيان لولي الأمر
+        $questionnaire = Questionnaire::where('child_id', $child_id)
+                            ->where('learning_difficulty_id', $difficulty_id)
+                            ->latest()->first();
+
+        // جلب أحدث نتيجة تقييم عملي (لعبة) للطفل
+        $gameAssessment = GameResult::where('child_id', $child_id)
+                            ->where('learning_difficulty_id', $difficulty_id)
+                            // ->where('game_type', 'assessment') // فك الكومنت لو عندك حقل بيميز اللعبة التشخيصية
+                            ->latest()->first();
+
+        if (!$questionnaire || !$gameAssessment) {
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'يجب إتمام استبيان ولي الأمر والتقييم العملي للطفل لإصدار التقرير.'
+            ], 400);
         }
 
-        $latest = Questionnaire::where('child_id', $child_id)->latest()->first();
+        $q_risk = $questionnaire->risk_level; 
+        $g_risk = $gameAssessment->risk_level;
 
-        if (!$latest) {
-            return response()->json(['status' => 'error', 'message' => 'No assessment found'], 404);
+        // منطق مصفوفة القرار
+        if (in_array($q_risk, ['High Risk', 'Moderate Risk']) && in_array($g_risk, ['High Risk', 'Moderate Risk'])) {
+            $reportTitle = "تأكيد وجود تحديات تعلم";
+            $parentMessage = "ملاحظاتك كانت دقيقة. التقييم العملي أكد وجود تحديات، وتم توجيه الطفل لمسار التدريب.";
+        } elseif ($q_risk == 'No Risk' && in_array($g_risk, ['High Risk', 'Moderate Risk'])) {
+            $reportTitle = "صعوبات تعلم غير ملحوظة";
+            $parentMessage = "التقييم العملي أظهر احتياج الطفل لدعم إضافي في بعض المهارات رغم عدم ظهورها بوضوح في المنزل.";
+        } elseif (in_array($q_risk, ['High Risk', 'Moderate Risk']) && $g_risk == 'No Risk') {
+            $reportTitle = "مستوى ممتاز - يحتاج لتوجيه التركيز";
+            $parentMessage = "الأداء العملي لطفلك ممتاز! التحديات التي تلاحظها قد تكون بسبب تشتت الانتباه وليس صعوبة تعلم عضوية.";
+        } else {
+            $reportTitle = "مسار تطور طبيعي";
+            $parentMessage = "أداء طفلك وملاحظاتك تتوافق تماماً مع معدلات النمو الطبيعية.";
         }
-
-        $risk_level = $latest->risk_level;
 
         return response()->json([
             'status' => 'success',
-            'child_name' => $child->name,
-            'result' => [
-                'score' => $latest->total_risk_score,
-                'risk_level' => $risk_level,
-                'recommendation' => $this->diagnosisService->getRecommendation($risk_level),
-                'date' => $latest->created_at->format('Y-m-d')
+            'report' => [
+                'title' => $reportTitle,
+                'message' => $parentMessage,
+                'questionnaire_risk' => $q_risk,
+                'game_risk' => $g_risk,
             ]
         ], 200);
     }
-
-    // 3. جلب تاريخ الاستبيانات للطفل
-    public function getChildHistory(int $child_id, Request $request)
-    {
-        // التأكد إن الطفل يخص المستخدم الحالي
-        $child = Child::where('id', $child_id)
-                      ->where('user_id', $request->user()->id)
-                      ->first();
-
-        if (!$child) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized access'], 403);
-        }
-
-        // جلب كل التقييمات مرتبة من الأحدث للأقدم
-        $history = Questionnaire::where('child_id', $child_id)
-                                ->orderBy('created_at', 'desc')
-                                ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'child_name' => $child->name,
-            'history_count' => $history->count(),
-            'data' => $history
-        ]);
-    }
+    
+    // (باقي دوال العرض زي ما هي عندك)
 }

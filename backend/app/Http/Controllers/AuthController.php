@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Child;
 
+
 class AuthController extends Controller
 {
     public function logout(Request $request)

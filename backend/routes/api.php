@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 // استدعاء كافة الكنترولرات
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChildController;
-use App\Http\Controllers\QuestionnaireController;
+use App\Http\Controllers\Api\QuestionnaireController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LearningDifficultyController;
@@ -17,72 +17,46 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\ChatbotController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
 
-// ==========================================
-// أولاً: المسارات العامة (Public - بدون Token)
-// ==========================================
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-// معلومات الصعوبات (متاحة للكل)
 Route::get('/difficulties', [LearningDifficultyController::class, 'index']);
 Route::get('/difficulties/{id}/questions', [LearningDifficultyController::class, 'getQuestions']);
 
-// --- 4. نظام التقييم والتشخيص (Assessment) ---
-// خليه Public علشان Angular يقدر يجيب الأسئلة بدون توكن
+
 Route::get('/assessment-content/{difficulty_id}', [GameController::class, 'getAssessmentContent']);
 
 
-// ==========================================
-// ثانياً: المسارات المحمية (auth:sanctum - تتطلب Token)
-// ==========================================
 Route::middleware('auth:sanctum')->group(function () {
 
 
-    // --- 1. إدارة الملف الشخصي للأب ---
     Route::prefix('user')->group(function () {
         Route::get('/profile', [ProfileController::class, 'show']);
         Route::put('/profile/update', [ProfileController::class, 'update']);
         Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
-        Route::post('/upload-image', [MediaController::class, 'uploadUserProfileImage']);
+        Route::post('/upload-image', [MediaController::class,'uploadUserProfileImage']);
     });
 
-    // --- 2. إدارة الأطفال ---
-    // 💡 خليناها children عشان تشتغل مع بوستمان زي ما إنت جربت بالظبط
-    Route::get('/children', [ChildController::class, 'index']); // 💡 ده اللي بيعرض كل الأطفال
+   
+    Route::get('/children', [ChildController::class, 'index']); 
     Route::post('/children', [ChildController::class, 'store']);
     Route::post('/child/{child_id}/upload-image', [MediaController::class, 'uploadChildImage']);
 
-    // --- 3. الاستبيانات ---
     Route::post('/submit-questionnaire', [QuestionnaireController::class, 'store']);
     Route::get('/results/{child_id}', [QuestionnaireController::class, 'showResults']);
     Route::get('/child/{child_id}/history', [QuestionnaireController::class, 'getChildHistory']);
+    Route::get('/child/{child_id}/difficulty/{difficulty_id}/smart-report', [QuestionnaireController::class, 'generateSmartReport']);
 
-    // --- 4. نظام التقييم والتشخيص (Assessment) ---
     Route::post('/submit-game-result', [GameController::class, 'submitGameResult']);
     Route::get('/assessment-result/{child_id}', [GameController::class, 'getAssessmentResult']);
 
-
-
-
-
-
-
-    // --- 5. نظام التدريب اليومي (Training) ---
-    // 💡 دخلناهم جوه الحماية عشان محدش يلعب في التدريب غير الطفل المسجل
     Route::get('/training/roadmap/{child_id}', [TrainingController::class, 'getTrainingRoadmap']);
     Route::get('/game-content/{difficulty_id}/{level}', [GameController::class, 'getGameContent']); 
     Route::post('/training/complete', [TrainingController::class, 'completeTrainingLevel']);
 
-    // --- 6. التقارير ---
     Route::get('/child/{child_id}/report', [ReportController::class, 'getComprehensiveReport']);
 
-    // --- 7. لوحة تحكم الإدارة (Admin) ---
     Route::prefix('admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'getStats']); // 💡 تم التجميع هنا
         Route::get('/questions', [QuestionController::class, 'index']);
@@ -91,7 +65,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/questions/{id}', [QuestionController::class, 'destroy']);
     });
 
-    // --- 8. مسارات المساعد الذكي (Chatbot) ---
     Route::prefix('chatbot')->group(function () {
         Route::post('/ask',                 [ChatbotController::class, 'ask']);
         Route::post('/explain-result',      [ChatbotController::class, 'explainResult']);

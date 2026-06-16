@@ -68,3 +68,4 @@ auth.json
 /.nova
 /.phpunit.cache
 /.zed
+/vendor
