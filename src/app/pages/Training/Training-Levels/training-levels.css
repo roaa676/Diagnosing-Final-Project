@@ -199,6 +199,31 @@
     font-size: 0.95rem;
 }
 
+.back-link {
+    background: transparent;
+    border: none;
+
+    color: #22c55e;
+    font-size: 1.2rem;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+
+    cursor: pointer;
+
+    margin-bottom: 1.5rem;
+
+    width: fit-content;
+    margin-left: -200px;
+    margin-right: auto;
+}
+
+.back-link:hover {
+    opacity: .8;
+}
+
 @media (max-width: 1100px) {
     .levels-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));

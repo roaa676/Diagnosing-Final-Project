@@ -13,8 +13,8 @@ export interface UserProfile {
 
 export interface ProfileResponse {
   status: string;
-  message: string;
-  user?: UserProfile;
+  message?: string;
+  data?: UserProfile;
 }
 
 export interface PasswordChangeRequest {

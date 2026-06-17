@@ -11,6 +11,7 @@ class Questionnaire extends Model
 
     protected $fillable = [
         'child_id',
+        'learning_difficulty_id',
         'q1_reading_aloud',
         'q2_confusing_letters',
         'q3_forgetting_instructions',

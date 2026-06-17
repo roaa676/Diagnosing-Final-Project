@@ -18,6 +18,7 @@ interface DifficultyCard {
     symptoms: string[];
     trainings: string[];
     guide: string;
+    articleLink: string;
 }
 
 @Component({
@@ -25,7 +26,8 @@ interface DifficultyCard {
     standalone: true,
     imports: [CommonModule, RouterModule, ButtonModule, MenuModule, RippleModule],
     templateUrl: './Learning-difficulties.html',
-    styleUrls: ['./Learning-difficulties.css']})
+    styleUrls: ['./Learning-difficulties.css']
+})
 export class LearningDifficultiesComponent implements OnInit {
     items: MenuItem[] = [];
 
@@ -43,7 +45,9 @@ export class LearningDifficultiesComponent implements OnInit {
                 'صعوبة في تكرار أسماء الحروف.'
             ],
             trainings: ['ألعاب صيد الحروف', 'القصص المسموعة', 'عرض كل الحروف'],
-            guide: 'تعزيز التفاعل بين الحروف والكلمات، واستخدام الأساليب الحديثة لتجاوز العقبات.'
+            guide: 'تعزيز التفاعل بين الحروف والكلمات، واستخدام الأساليب الحديثة لتجاوز العقبات.',
+            articleLink: 'https://www.annajah.net/عسر-القراءة-عند-الأطفال-أنواعه-وأسبابه-وأهم-طرق-علاجه-article-33080'
+
         },
         {
             title: 'عسر الحساب',
@@ -58,14 +62,17 @@ export class LearningDifficultiesComponent implements OnInit {
                 'صعوبة في تقدير المسافات والكميات.'
             ],
             trainings: ['السبورة المغناطيسية', 'ألعاب الأرقام', 'عرض كل التمارين'],
-            guide: 'استخدام أسلوب التعلم الحسابي المبني على التجربة واللعب، ودمج الأنشطة اليومية في التعلم.'
+            guide: 'استخدام أسلوب التعلم الحسابي المبني على التجربة واللعب، ودمج الأنشطة اليومية في التعلم.',
+            articleLink: 'https://dyscalculiatest.com/ar/blog/dyscalculia-guide-symptoms-tests-support-strategies'
         }
     ];
 
     constructor(
         private readonly location: Location,
         public router: Router
-    ) {}
+    ) { }
+
+    
 
     ngOnInit(): void {
         this.items = [

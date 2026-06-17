@@ -1,37 +1,126 @@
 <div class="game-container">
-    <!-- شريط التقدم العلوي -->
-    <div class="game-header">
-        <button (click)="goBack()" class="back-btn">
-            <i class="pi pi-arrow-right"></i>
-            خروج
-        </button>
+    <button *ngIf="!showResult" (click)="goBack()" class="back-link">
+        رجوع
+        <i class="pi pi-arrow-left"></i>
+    </button>
+    
+    <div *ngIf="!showResult" class="game-header">
+    
         <div class="progress-wrapper">
             <div class="progress-bar">
                 <div class="progress-fill" [style.width.%]="progressPercent"></div>
             </div>
-            <span class="progress-text">السؤال {{ currentQuestionIndex + 1 }} من {{ questions.length }}</span>
+    
+            <span class="progress-text">
+                السؤال {{ currentQuestionIndex + 1 }} من {{ questions.length }}
+            </span>
         </div>
+    
     </div>
 
-    <!-- حالة التحميل -->
     <div *ngIf="loading" class="loading-state">
         <div class="spinner"></div>
         <p>جاري تحضير التمرين يا بطل...</p>
     </div>
 
-    <!-- رسالة الخطأ -->
     <div *ngIf="errorMessage" class="error-state">
         <i class="pi pi-exclamation-circle"></i>
         <p>{{ errorMessage }}</p>
         <button (click)="goBack()" class="btn-primary">العودة للمستويات</button>
     </div>
 
-    <!-- منطقة السؤال -->
-    <div *ngIf="!loading && !errorMessage && currentQuestion" class="question-card">
+    <div *ngIf="!loading && !errorMessage && showResult" class="result-card">
+
+        <div class="summary-header">
+            <h1>ملخص أداء الطفل</h1>
+            <h4>نظرة سريعة على نتيجة تدريب عسر القراءه</h4>
+        </div>
+
+        <div class="performance-card" *ngFor="let result of trainingResults">
+
+            <div class="score-circle">
+            
+                <svg viewBox="0 0 120 120">
+            
+                    <circle class="circle-bg" cx="60" cy="60" r="52">
+                    </circle>
+            
+                    <circle class="circle-progress" cx="60" cy="60" r="52"
+                        [style.stroke-dashoffset]="getCircleOffset(result.score)">
+                    </circle>
+            
+                </svg>
+            
+                <span>{{ result.score }}%</span>
+            
+            </div>
+
+            <div class="performance-content">
+
+                <div class="performance-title">
+
+                    <h3>{{ difficultyName }}</h3>
+
+                    <span>
+                        {{ getLevelName(result.level) }}
+                    </span>
+
+                </div>
+
+                <div class="progress-track">
+
+                    <div class="progress-value" [style.width.%]="result.score">
+                    </div>
+
+                </div>
+
+                <div class="performance-stats">
+
+                    <span>
+
+                        {{ result.correct_count }}
+                        /
+                        {{ result.total_questions }}
+
+                        إجابة صحيحة
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="result-actions">
+
+            <a *ngIf="hasNextLevel" class="next-level-link" (click)="goToNextLevel()">
+
+                الانتقال إلى {{ nextLevelName }}
+                <i class="pi pi-arrow-left"></i>
+
+            </a>
+
+            <span *ngIf="!hasNextLevel" class="completed-message">
+
+                🎉 تم إنهاء جميع المستويات
+            </span>
+
+            <a class="levels-link" (click)="goBack()">
+
+                العودة للمستويات
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+    <div *ngIf="!loading && !errorMessage && !showResult && currentQuestion" class="question-card">
         <div class="question-content">
             <h2 class="question-text">{{ currentQuestion.question }}</h2>
-            
-            <!-- دعم الصوت -->
+
             <div *ngIf="currentQuestion.audio_url" class="audio-player">
                 <button (click)="playAudio(currentQuestion.audio_url)" class="audio-btn" [class.playing]="playingAudio">
                     <i [class]="playingAudio ? 'pi pi-volume-up' : 'pi pi-volume-down'"></i>
@@ -39,35 +128,28 @@
                 </button>
             </div>
 
-            <!-- دعم الصور -->
             <div *ngIf="currentQuestion.image_url" class="question-image">
                 <img [src]="currentQuestion.image_url" alt="صورة السؤال">
             </div>
         </div>
 
-        <!-- الخيارات -->
         <div class="options-grid" [class.visual-grid]="isVisualQuestion(currentQuestion)">
-            <div *ngFor="let option of currentQuestion.options" 
-                 class="option-card"
-                 [class.selected]="isSelected(option.id)"
-                 (click)="selectOption(option.id)">
-                
+            <div *ngFor="let option of currentQuestion.options" class="option-card"
+                [class.selected]="isSelected(option.id)" (click)="selectOption(option.id)">
+
                 <div *ngIf="option.image" class="option-image">
                     <img [src]="option.image" alt="خيار">
                 </div>
                 <span class="option-text">{{ option.text }}</span>
-                
+
                 <div class="selection-indicator">
                     <i class="pi pi-check" *ngIf="isSelected(option.id)"></i>
                 </div>
             </div>
         </div>
 
-        <!-- أزرار التحكم السفلى -->
         <div class="game-footer">
-            <button class="next-btn" 
-                    [disabled]="selectedOption === null"
-                    (click)="next()">
+            <button class="next-btn" [disabled]="selectedOption === null" (click)="next()">
                 {{ isLastQuestion ? 'إنهاء التدريب' : 'السؤال التالي' }}
                 <i class="pi pi-arrow-left"></i>
             </button>

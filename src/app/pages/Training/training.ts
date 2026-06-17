@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 interface TrainingCard {
     id: string;
@@ -18,38 +18,41 @@ interface TrainingCard {
     styleUrls: ['./training.css']
 })
 export class TrainingComponent {
+    childId: number | null = null;
+    difficultyId: number | null = null;
+
     trainings: TrainingCard[] = [
         {
             id: '1',
-            title: 'صعوبة 1',
+            title: 'القراءة',
             description:
-                'مجموعة من التدريبات المصممة لمعالجة التحديات الأولية في التعلم. تركز هذه الأنشطة على تحسين المهارات الحسية والحركية الأساسية وبناء الثقة بالنفس لدى الطفل.',
+                'مجموعة من التدريبات المصممة لمعالجة التحديات الأولية في التعلم. تركز هذه الأنشطة على تحسين مهارة القراءة وبناء الثقة بالنفس لدى الطفل.',
             image: 'assets/images/boy.png',
             theme: 'warm'
         },
         {
             id: '2',
-            title: 'صعوبة 2',
+            title: 'الحساب',
             description:
-                'تمارين مخصصة لتعزيز الذاكرة العاملة وزيادة معدلات التركيز والانتباه. يساعد هذا القسم في الربط بين المعلومات البصرية والسمعية مما يسهل استيعاب المعلومات الجديدة.',
+                'تمارين مخصصة لتعزيز الذاكرة العاملة وزيادة معدلات التركيز والانتباه. يساعد هذا القسم في الربط بين المعلومات البصرية و الحسابية مما يسهل استنتاج المعلومات الجديدة.',
             image: 'assets/images/Girl.png',
             theme: 'mint'
         },
-        {
-            id: '3',
-            title: 'صعوبة 3',
-            description:
-                'أنشطة وتدريبات متقدمة تستهدف تطوير الفهم القرائي والعمليات الحسابية والمنطقية. يوفر هذا القسم استراتيجيات تعليمية للتعامل مع المفاهيم المعقدة ودعم الطفل أكاديميًا.',
-            image: 'assets/images/write-IMG.png',
-            theme: 'sky'
-        }
     ];
 
-    constructor(private readonly router: Router) { }
+    constructor(private readonly router: Router,
+        private readonly route: ActivatedRoute
+    ) { 
+        this.childId = Number(this.route.snapshot.queryParamMap.get('childId'));
+        this.difficultyId = Number(this.route.snapshot.queryParamMap.get('difficultyId'));
+    }
 
     openTraining(training: TrainingCard): void {
         this.router.navigate(['/training/levels'], {
-            state: { trainingId: training.id }
+            queryParams: {
+                childId: this.childId,
+                difficultyId: training.id
+            }
         });
     }
 }

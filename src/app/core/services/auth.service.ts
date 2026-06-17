@@ -32,9 +32,6 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * User Login
-   */
   login(email: string, password: string): Observable<AuthResponse> {
     const request: LoginRequest = { email, password };
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request).pipe(
@@ -47,9 +44,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * User Registration
-   */
   register(name: string, email: string, password: string, confirmPassword: string, children: any[]): Observable<AuthResponse> {
     const request: RegisterRequest = {
       name,
@@ -68,31 +62,22 @@ export class AuthService {
     );
   }
 
-  /**
-   * Get stored authentication token
-   */
   getToken(): string | null {
     return localStorage.getItem('auth_token');
   }
 
-  /**
-   * Check if user is logged in
-   */
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
 
-  /**
-   * Logout user
-   */
   logout(): void {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('selected_child_id');
+    localStorage.removeItem('selected_difficulty_id');
+    localStorage.removeItem('questionnaireResult');
     this.isLoggedIn.next(false);
   }
 
-  /**
-   * Get Bearer token for HTTP headers
-   */
   getAuthHeaders(): HttpHeaders {
     const token = this.getToken();
     return new HttpHeaders({

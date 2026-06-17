@@ -16,6 +16,14 @@ class QuestionController extends Controller
         ]);
     }
 
+    // جلب نصوص أسئلة الاستبيان فقط لصعوبة معينة
+    public function getQuestionnaire(int $learning_difficulty_id)
+    {
+        return Question::where('learning_difficulty_id', $learning_difficulty_id)
+            ->orderBy('order')
+            ->pluck('question_text');
+    }
+
     // 2. إضافة سؤال جديد
     public function store(Request $request)
     {

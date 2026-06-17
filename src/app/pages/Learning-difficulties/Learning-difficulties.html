@@ -100,9 +100,12 @@
                     <section class="info-box info-box--guide">
                         <h3 class="mb-1"><i class="fa-regular fa-bookmark"></i> دليل الأهل؟</h3>
                         <p>{{ item.guide }}</p>
-                        <button type="button" class="more-link">
-                            اقرأ المزيد <i class="fa-solid fa-arrow-left mr-2"></i>
-                        </button>
+                        <a [href]="item.articleLink" target="_blank" rel="noopener noreferrer" class="more-link">
+                        
+                            اقرأ المزيد
+                            <i class="fa-solid fa-arrow-left mr-2"></i>
+                        
+                        </a>
                     </section>
                 </div>
             </article>

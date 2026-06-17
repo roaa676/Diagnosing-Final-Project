@@ -1,3 +1,4 @@
+import { TrainingService } from '@/core/services/training.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -14,6 +15,7 @@ interface LevelCard {
     buttonVariant: 'solid' | 'outline' | 'locked';
     disabled?: boolean;
     levelNumber: 1 | 2 | 3;
+    score?: number;
 }
 
 @Component({
@@ -39,6 +41,7 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
         {
             title: 'المستوى الثاني',
             description: 'تمارين متوسطة الصعوبة لتعزيز المهارات المكتسبة وتطبيقها.',
+            badge: 'متوسط',
             visualTheme: 'blue',
             buttonLabel: 'ابدأ التدريب',
             buttonIcon: 'pi pi-play',
@@ -67,17 +70,16 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly router: Router,
-        private readonly route: ActivatedRoute
+        private readonly route: ActivatedRoute,
+        private readonly trainingService: TrainingService
     ) { }
 
     ngOnInit(): void {
-        // حالياً لا توجد شاشة تشغيل تمرين منفصلة/ربط واضح للـ level داخل هذا الجزء من المشروع.
-        // لذلك نعمل الأقل: فتح/قفل مستويات 1/2/3 بناءً على TrainingProgress المحفوظ في localStorage.
-        // إذا عندك endpoint لـ training progress أو response من backend، سنغير المنطق مباشرة.
         this.childId = this.getNumericQueryParam('childId') ?? this.getLocalStorageNumber('child_id');
         this.difficultyId = this.getNumericQueryParam('difficultyId') ?? this.getLocalStorageNumber('difficulty_id');
-
-        this.applyUnlockRulesFromLocalStorage();
+        this.loadCompletedLevels();
+        
+        // this.applyUnlockRulesFromLocalStorage();
     }
 
     ngOnDestroy(): void {
@@ -89,8 +91,9 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
         if (level.disabled) {
             return;
         }
-
-        // فتح صفحة تشغيل التدريب (Game) حتى يظهر طلب API /game-content
+        console.log('CHILD ID =', this.childId);
+        console.log('DIFFICULTY ID =', this.difficultyId);
+        console.log('LEVEL =', level.levelNumber);
         this.router.navigate(['/training/game'], {
             queryParams: {
                 childId: this.childId,
@@ -100,26 +103,79 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
         });
 
     }
+    private loadCompletedLevels(): void {
+
+        if (!this.childId || !this.difficultyId) {
+            return;
+        }
+
+        this.trainingService
+            .getTrainingResults(this.childId, this.difficultyId)
+            .subscribe({
+                next: (res) => {
+
+                    const completedLevels = res?.data || [];
+
+                    const completedLevelNumbers =
+                        completedLevels.map((x: any) => Number(x.level));
+
+                    const highestCompleted =
+                        completedLevelNumbers.length
+                            ? Math.max(...completedLevelNumbers)
+                            : 0;
+
+                    const nextAvailableLevel = highestCompleted + 1;
+
+                    this.levels = this.levels.map(level => {
+
+                        if (completedLevelNumbers.includes(level.levelNumber)) {
+
+                            return {
+                                ...level,
+                                buttonLabel: 'تم اجتيازه',
+                                buttonIcon: 'pi pi-check',
+                                buttonVariant: 'outline',
+                                disabled: false,
+                                badgeIcon: undefined
+                            };
+                        }
+
+                        if (level.levelNumber === nextAvailableLevel) {
+
+                            return {
+                                ...level,
+                                buttonLabel: 'ابدأ التدريب',
+                                buttonIcon: 'pi pi-play',
+                                buttonVariant: 'solid',
+                                disabled: false,
+                                badgeIcon: undefined
+                            };
+                        }
+
+                        return {
+                            ...level,
+                            buttonLabel: 'مقفل حالياً',
+                            buttonIcon: 'pi pi-lock',
+                            buttonVariant: 'locked',
+                            disabled: true,
+                            badgeIcon: 'pi pi-lock'
+                        };
+                    });
+                }
+            });
+    }
 
     private applyUnlockRulesFromLocalStorage(): void {
-        // نتبع نفس pattern اللي مستخدمه AssessmentComponent:
-        // training progress غالباً محفوظ عندك في localStorage.
-        // هنا نقرأ current_level و next unlock percentage إن وُجد.
+      
         const raw = localStorage.getItem('trainingProgress');
         if (!raw) {
-            return; // افتراضيًا فقط المستوى 1 مفتوح
+            return; 
         }
 
         try {
             const progress = JSON.parse(raw) as any;
             const currentLevel = Number(progress?.current_level);
             const progressPercentage = Number(progress?.progress_percentage);
-
-            // قواعد تقريبية:
-            // - إذا current_level >= 1: افتح 1
-            // - إذا current_level >= 2: افتح 2
-            // - إذا current_level >= 3: افتح 3
-            // (لو عندك منطق مختلف نعدله)
 
             this.levels = this.levels.map((lvl) => {
                 const unlocked = currentLevel >= lvl.levelNumber || (lvl.levelNumber === 2 && progressPercentage >= 30);
@@ -144,7 +200,7 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
                 };
             });
         } catch {
-            // تجاهل لو بيانات محمية/غير صالحة
+            
         }
     }
 
@@ -162,5 +218,8 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
             return null;
         }
     }
+    
+    goBack(): void {
+        this.router.navigate(['/training']);
+    }
 }
-

@@ -70,7 +70,7 @@
 
             <div class="options-section">
                 <div *ngIf="isVisualQuestion(question)" class="visual-options">
-                    <button type="button" *ngFor="let option of question.options" class="visual-option-item" [class.selected]="isSelected(option.id)" (click)="selectOption(option.id)">
+                    <button type="button" *ngFor="let option of question.options" class="visual-option-item" [class.selected]="isSelected(option.id)" (click)="selectOption(option.id)" [disabled]="reviewMode">
                         <div class="visual-option-content">
                             <img *ngIf="option.image" [src]="option.image" [alt]="option.text" class="option-image" />
                             <span *ngIf="!option.image" class="option-shape">{{ option.text }}</span>
@@ -106,12 +106,12 @@
             </div>
 
             <div class="navigation-buttons">
-                <button type="button" class="btn btn-secondary" (click)="previousQuestion()" [disabled]="!canGoPrevious()">
+                <button type="button" class="btn btn-secondary"  (click)="previousQuestion()" [disabled]="!canGoPrevious()">
                     <span class="btn-arrow">→</span>
                     <span>السؤال السابق</span>
                 </button>
 
-                <button type="button" class="btn btn-primary" (click)="nextQuestion()">
+                <button type="button" class="btn btn-primary"  (click)="nextQuestion()">
                     <span>{{ getNextButtonText() }}</span>
                     <span class="btn-arrow">←</span>
                 </button>

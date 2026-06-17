@@ -1,11 +1,14 @@
+import { ChildService } from '@/core/services/child.service';
+import { ProfileService } from '@/core/services/profile.service';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
+import { DialogModule } from 'primeng/dialog';
 
 type SectionKey = 'personal-info' | 'children' | 'support' | 'notifications';
 type NavTone = 'green' | 'purple' | 'blue' | 'gray';
@@ -38,11 +41,11 @@ interface NotificationSetting {
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule, ButtonModule, AvatarModule, InputTextModule, PasswordModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule, ButtonModule, AvatarModule, InputTextModule, PasswordModule, DialogModule],
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
     readonly navigationItems: NavigationItem[] = [
         {
             label: 'المعلومات الشخصية',
@@ -70,28 +73,13 @@ export class ProfileComponent {
         }
     ];
 
-    readonly childProfiles: ChildProfile[] = [
-        {
-            name: 'عمر',
-            details: '8 سنوات • المستوى 1',
-            avatar: 'assets/images/boy.png'
-        },
-        {
-            name: 'ليلى',
-            details: '6 سنوات • المستوى 2',
-            avatar: 'assets/images/Girl.png'
-        }
-    ];
-
+    childProfiles: ChildProfile[] = [];
+    showAddChildDialog = false;
     readonly supportItems: SupportItem[] = [
         {
             label: 'الأسئلة الشائعة',
             icon: 'pi pi-question-circle'
         },
-        {
-            label: 'تواصل معنا',
-            icon: 'pi pi-envelope'
-        }
     ];
 
     readonly notificationSettings: NotificationSetting[] = [
@@ -116,8 +104,51 @@ export class ProfileComponent {
         email: new FormControl('ahmed@example.com'),
         password: new FormControl('12345678')
     });
+    childForm = new FormGroup({
+        name: new FormControl(''),
+        age: new FormControl('')
+    });
 
-    constructor(private readonly router: Router) {}
+    constructor(private readonly router: Router,
+        private readonly profileService: ProfileService,
+        private readonly childService: ChildService
+    ) { }
+
+    ngOnInit(): void {
+        this.loadProfile();
+        this.loadChildren();
+    }
+
+    loadProfile(): void {
+        this.profileService.getProfile().subscribe({
+            next: (res) => {
+                if (res.data) {
+                    this.profileForm.patchValue({
+                        guardianName: res.data.name,
+                        email: res.data.email
+                    });
+                }
+            },
+            error: (err: any) => console.error(err)
+        });
+    }
+
+    loadChildren(): void {
+        this.childService.getAllChildren().subscribe({
+            next: (res) => {
+
+                this.childProfiles = (res.data ?? []).map(child => ({
+                    name: child.name,
+                    details: `${child.age} سنوات`,
+                    avatar: child.image
+                        ? `http://127.0.0.1:8000/${child.image}`
+                        : 'assets/images/boy.png'
+                }));
+
+            },
+            error: (err: any) => console.error(err)
+        });
+    }
 
     setActiveSection(section: SectionKey): void {
         this.activeSection = section;
@@ -134,7 +165,20 @@ export class ProfileComponent {
     }
 
     saveProfile(): void {
-        console.log('Saving profile:', this.profileForm.getRawValue());
+
+        const payload = {
+            name: this.profileForm.value.guardianName ?? '',
+            email: this.profileForm.value.email ?? ''
+        };
+
+        this.profileService.updateProfile(payload).subscribe({
+            next: () => {
+                alert('تم حفظ البيانات بنجاح');
+            },
+            error: (err: any) => {
+                console.error(err);
+            }
+        });
     }
 
     trackByChild(_: number, child: ChildProfile): string {
@@ -142,16 +186,40 @@ export class ProfileComponent {
     }
 
     addChild(): void {
-        console.log('Add child requested');
-    }
 
+        this.showAddChildDialog = true;
+    }
     editChild(child: ChildProfile): void {
         console.log('Edit child:', child.name);
     }
+    saveChild(): void {
 
-    openSupportItem(item: SupportItem): void {
-        console.log('Support item:', item.label);
+        const name = this.childForm.value.name ?? '';
+        const age = Number(this.childForm.value.age);
+
+        this.childService.createChild(name, age).subscribe({
+            next: () => {
+
+                this.loadChildren();
+
+                this.childForm.reset();
+
+                this.showAddChildDialog = false;
+            },
+            error: (err: any) => {
+                console.error(err);
+            }
+        });
     }
+
+    openSupportItem(): void {
+        const chatButton = document.querySelector(
+            'button.chat-bubble'
+        ) as HTMLElement | null;
+
+        chatButton?.click();
+    }
+
 
     trackByNotification(_: number, item: NotificationSetting): string {
         return item.id;

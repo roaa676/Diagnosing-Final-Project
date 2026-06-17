@@ -5,6 +5,9 @@ import { Observable } from 'rxjs';
 export interface LearningDifficulty {
   id: number;
   name: string;
+  name_ar?: string;
+  name_en?: string;
+  test_type?: string;
   description: string;
   icon?: string;
   category?: string;

@@ -1,16 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { AssessmentService } from '@/core/services/assessment.service';
+import { QuestionnaireService } from '@/core/services/questionnaire.service';
 import { ChildService } from '@/core/services/child.service';
 
 interface QuestionnaireQuestion {
   id: number;
   text: string;
-  answer?: number; // 0=لا، 1=أحياناً، 2=نعم
+  answer?: number; 
 }
 
 interface QuestionnaireData {
@@ -30,24 +30,7 @@ interface QuestionnaireData {
   styleUrls: ['./questionnaire.component.css']
 })
 export class QuestionnaireComponent implements OnInit, OnDestroy {
-  questions: QuestionnaireQuestion[] = [
-    {
-      id: 1,
-      text: 'هل يجد الطفل صعوبة في القراءة بصوت عالٍ؟'
-    },
-    {
-      id: 2,
-      text: 'هل يخلط الطفل بين الحروف المتشابهة (ب، د)؟'
-    },
-    {
-      id: 3,
-      text: 'هل ينسى الطفل التعليمات الموجهة إليه بسرعة؟'
-    },
-    {
-      id: 4,
-      text: 'هل يتجنب الطفل الأنشطة التي تتطلب القراءة؟'
-    }
-  ];
+  questions: QuestionnaireQuestion[] = [];
 
   answers: QuestionnaireData = {
     child_id: 0,
@@ -57,7 +40,9 @@ export class QuestionnaireComponent implements OnInit, OnDestroy {
     q3_forgetting_instructions: -1,
     q4_avoiding_reading: -1
   };
-
+  loadingQuestions = false;
+  questionsError = '';
+  questionAnswers: Record<number, number> = {};
   loading = false;
   submitted = false;
   successMessage = false;
@@ -68,14 +53,16 @@ export class QuestionnaireComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   constructor(
-    private assessmentService: AssessmentService,
+    private questionnaireService: QuestionnaireService,
     private childService: ChildService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+    console.log('Questionnaire page loaded');
     this.loadChildData();
+    this.loadQuestions();
   }
 
   ngOnDestroy(): void {
@@ -83,108 +70,135 @@ export class QuestionnaireComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  loadQuestions(): void {
+    this.loadingQuestions = true;
+
+    const questionnaireId = 1;
+
+    console.log('Calling questionnaire endpoint:', questionnaireId);
+
+    this.questionnaireService
+      .getQuestionnaire(questionnaireId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          console.log('Questionnaire response:', response);
+
+          this.questions = (response.data || []).map((q: any) => ({
+            id: q.id,
+            text: q.question_text
+          }));
+
+          this.loadingQuestions = false;
+          this.updateProgress();
+        },
+        error: (error) => {
+          console.error('Questionnaire error:', error);
+
+          this.questionsError =
+            error?.error?.message || 'ظپط´ظ„ طھط­ظ…ظٹظ„ ط£ط³ط¦ظ„ط© ط§ظ„ط§ط³طھط¨ظٹط§ظ†';
+
+          this.loadingQuestions = false;
+        }
+      });
+  }
+
   loadChildData(): void {
-    const childId = this.route.snapshot.queryParamMap.get('childId');
-    const difficultyId = this.route.snapshot.queryParamMap.get('difficultyId');
+    const childId = this.route.snapshot.paramMap.get('childId');
+    const difficultyId = this.getStoredDifficultyId();
 
     if (childId) {
       this.answers.child_id = parseInt(childId, 10);
     }
-    if (difficultyId) {
-      this.answers.learning_difficulty_id = parseInt(difficultyId, 10);
-    }
 
-    // في الواقع، يمكن جلب بيانات الطفل الحالي إذا لزم الأمر
+    if (difficultyId) {
+      this.answers.learning_difficulty_id = difficultyId;
+    }
   }
 
   selectAnswer(questionId: number, value: number): void {
-    const answerKey = `q${questionId}_${['reading_aloud', 'confusing_letters', 'forgetting_instructions', 'avoiding_reading'][questionId - 1]}`;
-    
-    switch(questionId) {
-      case 1:
-        this.answers.q1_reading_aloud = value;
-        break;
-      case 2:
-        this.answers.q2_confusing_letters = value;
-        break;
-      case 3:
-        this.answers.q3_forgetting_instructions = value;
-        break;
-      case 4:
-        this.answers.q4_avoiding_reading = value;
-        break;
-    }
-
+    this.questionAnswers[questionId] = value;
     this.updateProgress();
   }
 
   updateProgress(): void {
-    const answered = [
-      this.answers.q1_reading_aloud >= 0,
-      this.answers.q2_confusing_letters >= 0,
-      this.answers.q3_forgetting_instructions >= 0,
-      this.answers.q4_avoiding_reading >= 0
-    ].filter(v => v).length;
+    const answered = this.questions.filter(
+      (q) => this.questionAnswers[q.id] !== undefined
+    ).length;
 
-    this.progressPercentage = Math.round((answered / 4) * 100);
+    const total = this.questions.length;
+
+    this.progressPercentage =
+      total > 0 ? Math.round((answered / total) * 100) : 0;
   }
 
   getAnswerValue(questionId: number): number {
-    switch(questionId) {
-      case 1:
-        return this.answers.q1_reading_aloud;
-      case 2:
-        return this.answers.q2_confusing_letters;
-      case 3:
-        return this.answers.q3_forgetting_instructions;
-      case 4:
-        return this.answers.q4_avoiding_reading;
-      default:
-        return -1;
-    }
+    return this.questionAnswers[questionId] ?? -1;
   }
 
   isAllAnswered(): boolean {
-    return (
-      this.answers.q1_reading_aloud >= 0 &&
-      this.answers.q2_confusing_letters >= 0 &&
-      this.answers.q3_forgetting_instructions >= 0 &&
-      this.answers.q4_avoiding_reading >= 0
-    );
+    return this.questions.length > 0 && this.questions.every((q) => this.questionAnswers[q.id] !== undefined);
   }
 
+  
   submitAnswers(): void {
+    console.log("SUBMIT CLICKED");
+    console.log('answers object:', this.answers);
+    console.log('child_id:', this.answers?.child_id);
     if (!this.isAllAnswered()) {
-      this.errorMessage = 'يرجى الإجابة على جميع الأسئلة';
+      this.errorMessage = 'ظٹط±ط¬ظ‰ ط§ظ„ط¥ط¬ط§ط¨ط© ط¹ظ„ظ‰ ط¬ظ…ظٹط¹ ط§ظ„ط£ط³ط¦ظ„ط©';
       return;
     }
 
-    if (!this.answers.child_id || !this.answers.learning_difficulty_id) {
-      this.errorMessage = 'معرّف الطفل أو مستوى الصعوبة غير صحيح';
+    if (!this.answers.child_id) {
+      this.errorMessage = 'ظ…ط¹ط±ظ‘ظپ ط§ظ„ط·ظپظ„ ط£ظˆ ظ…ط³طھظˆظ‰ ط§ظ„طµط¹ظˆط¨ط© ط؛ظٹط± طµط­ظٹط­. ظٹط±ط¬ظ‰ ط¥ط¹ط§ط¯ط© ط§ط®طھظٹط§ط± ط§ظ„ط·ظپظ„ ط£ظˆ ط§ظ„طھط£ظƒط¯ ظ…ظ† طھط³ط¬ظٹظ„ظ‡.';
       return;
     }
+    console.log('ROUTE CHILD ID = ', this.route.snapshot.paramMap.get('childId'));
+    console.log('ANSWERS CHILD ID = ', this.answers.child_id);
+    const payload = {
+      child_id: this.answers.child_id,
+      learning_difficulty_id: this.answers.learning_difficulty_id,
+      q1_reading_aloud: this.getAnswerForIndex(0),
+      q2_confusing_letters: this.getAnswerForIndex(1),
+      q3_forgetting_instructions: this.getAnswerForIndex(2),
+      q4_avoiding_reading: this.getAnswerForIndex(3)
+    };
 
+    console.log('[Questionnaire Frontend Check] Payload before send:', payload);
+   
     this.loading = true;
     this.errorMessage = '';
-
-    this.assessmentService.submitQuestionnaire(this.answers)
+    console.log('ROUTE CHILD ID = ', this.route.snapshot.paramMap.get('childId'));
+    console.log('ANSWERS CHILD ID = ', this.answers.child_id);
+    console.log('PAYLOAD = ', payload);
+    this.questionnaireService.submitQuestionnaire(payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
           this.loading = false;
           this.submitted = true;
           this.successMessage = true;
-          // Store result for next page
           localStorage.setItem('questionnaireResult', JSON.stringify(response));
         },
         error: (error: any) => {
           this.loading = false;
-          this.errorMessage = error?.error?.message || 'حدث خطأ أثناء إرسال الاستبيان';
+          console.error('Error Details:', error);
+          this.errorMessage = error?.error?.message || 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط¥ط±ط³ط§ظ„ ط§ظ„ط§ط³طھط¨ظٹط§ظ†';
         }
       });
   }
 
+  private getAnswerForIndex(index: number): number {
+    const question = this.questions[index];
+    if (!question) {
+      return -1;
+    }
+    return this.questionAnswers[question.id] ?? -1;
+  }
+
   resetQuestionnaire(): void {
+    this.questionAnswers = {};
     this.answers = {
       child_id: this.answers.child_id,
       learning_difficulty_id: this.answers.learning_difficulty_id,
@@ -203,8 +217,20 @@ export class QuestionnaireComponent implements OnInit, OnDestroy {
     this.router.navigate(['/assessment'], {
       queryParams: {
         childId: this.answers.child_id,
-        difficultyId: this.answers.learning_difficulty_id
+        difficultyId: this.answers.learning_difficulty_id,
       }
     });
   }
+
+  private getStoredDifficultyId(): number {
+    const rawValue =
+      this.route.snapshot.queryParamMap.get('difficultyId') ??
+      localStorage.getItem('selected_difficulty_id') ??
+      localStorage.getItem('difficulty_id');
+
+    const difficultyId = Number(rawValue);
+    return Number.isFinite(difficultyId) && difficultyId > 0 ? difficultyId : 1;
+  }
 }
+
+

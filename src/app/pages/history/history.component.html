@@ -8,17 +8,8 @@
             <span class="text-2xl font-bold text-surface-900 dark:text-surface-0">بوصلة</span>
         </div>
 
-        <button
-            pButton
-            type="button"
-            label="رجوع"
-            icon="pi pi-arrow-left"
-            iconPos="right"
-            [text]="true"
-            severity="success"
-            class="header-back-action"
-            routerLink="/dashboard"
-        ></button>
+        <button pButton type="button" label="رجوع" icon="pi pi-arrow-left" iconPos="right" [text]="true"
+            severity="success" class="header-back-action" routerLink="/dashboard"></button>
     </header>
 
     <section class="page-intro">
@@ -43,10 +34,15 @@
                         <p-tag [value]="item.badge" [severity]="item.badgeSeverity" styleClass="topic-badge"></p-tag>
                     </div>
 
-                    <ng-container *ngIf="item.featured">
-                        <p-progressBar [value]="item.progress ?? 0" [showValue]="false"
-                            styleClass="topic-progress"></p-progressBar>
-                        <p class="topic-card__note">{{ item.note }}</p>
+                    <ng-container *ngIf="item.progress !== undefined">
+
+                        <p-progressBar [value]="item.progress ?? 0" [showValue]="false" styleClass="topic-progress">
+                        </p-progressBar>
+
+                        <p class="topic-card__note">
+                            {{ item.progress ?? 0 }}%
+                        </p>
+
                     </ng-container>
                 </article>
             </ng-container>
@@ -88,6 +84,26 @@
                     <span>نتائج التدريبات</span>
                 </div>
             </section>
+
+            <!-- <section class="history-list" *ngIf="!loading">
+                <h3>سجل الأنشطة والنتائج</h3>
+                <div *ngIf="error" class="error">{{ error }}</div>
+                <div *ngIf="!entries?.length">لا يوجد نتائج حتى الآن.</div>
+                <ul *ngIf="entries?.length">
+                    <li *ngFor="let e of entries">
+                        <div class="entry-row">
+                            <div class="entry-meta">
+                                <strong>{{ e.activity_type }}</strong>
+                                <span class="muted">{{ formatEntryDate(e.timestamp) }}</span>
+                            </div>
+                            <div class="entry-desc">{{ e.description }}</div>
+                            <div class="entry-result" *ngIf="e.result">
+                                <span>{{ getEntryScoreLabel(e) }}</span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </section> -->
         </section>
     </main>
 </div>

@@ -274,7 +274,7 @@ Service: LearningDifficultyService.getAllDifficulties()
 GET /api/difficulties/{difficulty_id}/questions
 Headers: Authorization: Bearer {token}
 
-Example: /api/difficulties/1/questions
+Example:/api/assessment-content/{difficultyId}
 
 Response (200 OK):
 {

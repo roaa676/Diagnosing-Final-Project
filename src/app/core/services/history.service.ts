@@ -3,11 +3,20 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface HistoryEntry {
-  id: number;
+  id: string | number;
   activity_type: string;
   description: string;
   timestamp: string;
-  result?: any;
+  learning_difficulty_id?: number;
+  result?: {
+    raw_score?: number;
+    score?: number;
+    correct_count?: number;
+    total_questions?: number;
+    risk_level?: string;
+    z_score?: number;
+    level?: number;
+  };
 }
 
 export interface HistoryResponse {

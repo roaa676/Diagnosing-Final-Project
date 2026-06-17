@@ -9,207 +9,169 @@ class GameContentSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('game_contents')->truncate(); // مسح القديم
+        DB::table('game_contents')->truncate();
 
-        $contents = [
-            // ==============================================================
-            // 🔴 أولاً: أسئلة التشخيص (Assessment) - للمرة الأولى فقط
-            // ==============================================================
-            
-            // 1. تشخيص عسر القراءة - المستوى 1 (15 سؤال - تمييز الحروف)
-            [
-                'learning_difficulty_id' => 1,
-                'level_name' => 'تشخيص - مستوى 1 (تمييز الحروف)',
-                'difficulty_level' => 1,
-                'content_type' => 'assessment',
-                'content_data' => json_encode([
-                    'questions' => [
-                        ['target' => 'ب', 'options' => ['ت', 'ب', 'ث', 'ن']],
-                        ['target' => 'ج', 'options' => ['ح', 'خ', 'ج', 'ع']],
-                        ['target' => 'س', 'options' => ['ش', 'ص', 'س', 'ض']],
-                        ['target' => 'د', 'options' => ['ذ', 'د', 'ر', 'ز']],
-                        ['target' => 'ط', 'options' => ['ظ', 'ط', 'ص', 'ض']],
-                        ['target' => 'ع', 'options' => ['غ', 'ع', 'ح', 'خ']],
-                        ['target' => 'ف', 'options' => ['ق', 'ف', 'غ', 'ع']],
-                        ['target' => 'ص', 'options' => ['ض', 'ص', 'ط', 'ظ']],
-                        ['target' => 'م', 'options' => ['م', 'ن', 'هـ', 'و']],
-                        ['target' => 'ل', 'options' => ['ك', 'ل', 'م', 'ن']],
-                        ['target' => 'هـ', 'options' => ['ع', 'غ', 'هـ', 'خ']],
-                        ['target' => 'ك', 'options' => ['ل', 'ك', 'ع', 'غ']],
-                        ['target' => 'ن', 'options' => ['ب', 'ت', 'ث', 'ن']],
-                        ['target' => 'ي', 'options' => ['ئ', 'ي', 'ى', 'ب']],
-                        ['target' => 'ر', 'options' => ['ز', 'ر', 'د', 'ذ']],
-                    ]
-                ], JSON_UNESCAPED_UNICODE),
-            ],
+        $records = [
+            $this->contentRecord(1, 'التقييم التشخيصي', 1, 'assessment', $this->assessmentDiagnosticQuestions()),
 
-            // 2. تشخيص عسر القراءة - المستوى 2 (15 سؤال - الانعكاس المرآتي)
-            [
-                'learning_difficulty_id' => 1,
-                'level_name' => 'تشخيص - مستوى 2 (الانعكاس المرآتي)',
-                'difficulty_level' => 2,
-                'content_type' => 'assessment',
-                'content_data' => json_encode([
-                    'questions' => [
-                        ['target' => '٢', 'options' => ['٦', '٢', '٣', '٤']], 
-                        ['target' => '٧', 'options' => ['٨', '٧', '٦', '٢']],
-                        ['target' => 'b', 'options' => ['d', 'b', 'p', 'q']], 
-                        ['target' => 'p', 'options' => ['q', 'p', 'b', 'd']],
-                        ['target' => 'بطة', 'options' => ['طبة', 'بطة', 'بظة', 'تطة']],
-                        ['target' => 'قلم', 'options' => ['كلم', 'قلم', 'غلم', 'فلم']],
-                        ['target' => 'كلب', 'options' => ['قلب', 'كلب', 'كاب', 'بلب']],
-                        ['target' => 'باب', 'options' => ['ناب', 'تاب', 'باب', 'ثاب']],
-                        ['target' => 'd', 'options' => ['b', 'p', 'q', 'd']],
-                        ['target' => 'q', 'options' => ['p', 'b', 'd', 'q']],
-                        ['target' => '٦', 'options' => ['٢', '٦', '٩', '٤']],
-                        ['target' => '٩', 'options' => ['٦', '٩', '٥', '٤']],
-                        ['target' => '٤', 'options' => ['٣', '٤', '٢', '٦']],
-                        ['target' => 'W', 'options' => ['M', 'V', 'N', 'W']],
-                        ['target' => 'm', 'options' => ['n', 'w', 'm', 'u']],
-                    ]
-                ], JSON_UNESCAPED_UNICODE),
-            ],
+            $this->contentRecord(1, 'التدريب - المستوى السهل (القراءة)', 1, 'training', $this->dyslexiaTrainingLevelOne()),
+            $this->contentRecord(1, 'التدريب - المستوى المتوسط (القراءة)', 2, 'training', $this->dyslexiaTrainingLevelTwo()),
+            $this->contentRecord(1, 'التدريب - المستوى المتقدم (القراءة)', 3, 'training', $this->dyslexiaTrainingLevelThree()),
 
-            // 3. تشخيص عسر الحساب - المستوى 1 (15 سؤال - خدعة الأرقام المعكوسة)
-            [
-                'learning_difficulty_id' => 2,
-                'level_name' => 'تشخيص - مستوى 1 (اتجاهات الأرقام)',
-                'difficulty_level' => 1,
-                'content_type' => 'assessment',
-                'content_data' => json_encode([
-                    'questions' => [
-                        ['left' => 12, 'right' => 21, 'correct_side' => 'right'], 
-                        ['left' => 45, 'right' => 54, 'correct_side' => 'right'],
-                        ['left' => 13, 'right' => 31, 'correct_side' => 'right'],
-                        ['left' => 67, 'right' => 76, 'correct_side' => 'right'],
-                        ['left' => 98, 'right' => 89, 'correct_side' => 'left'],
-                        ['left' => 32, 'right' => 23, 'correct_side' => 'left'],
-                        ['left' => 15, 'right' => 51, 'correct_side' => 'right'],
-                        ['left' => 82, 'right' => 28, 'correct_side' => 'left'],
-                        ['left' => 14, 'right' => 41, 'correct_side' => 'right'],
-                        ['left' => 73, 'right' => 37, 'correct_side' => 'left'],
-                        ['left' => 26, 'right' => 62, 'correct_side' => 'right'],
-                        ['left' => 91, 'right' => 19, 'correct_side' => 'left'],
-                        ['left' => 17, 'right' => 71, 'correct_side' => 'right'],
-                        ['left' => 53, 'right' => 35, 'correct_side' => 'left'],
-                        ['left' => 84, 'right' => 48, 'correct_side' => 'left'],
-                    ]
-                ], JSON_UNESCAPED_UNICODE),
-            ],
-
-            // ==============================================================
-            // 🟢 ثانياً: أسئلة التدريب (Training) - التدريب اليومي المستمر
-            // ==============================================================
-
-            // 4. تدريب عسر القراءة - مستوى 1 (15 سؤال)
-            [
-                'learning_difficulty_id' => 1,
-                'level_name' => 'تدريب - المستوى السهل (تباين بصري)',
-                'difficulty_level' => 1,
-                'content_type' => 'training',
-                'content_data' => json_encode([
-                    'questions' => [
-                        ['target' => 'أ', 'options' => ['أ', 'س', 'م', 'ط']],
-                        ['target' => 'ك', 'options' => ['ع', 'ك', 'ص', 'و']],
-                        ['target' => 'ل', 'options' => ['هـ', 'ق', 'ل', 'ي']],
-                        ['target' => 'م', 'options' => ['د', 'ش', 'ف', 'م']],
-                        ['target' => 'ن', 'options' => ['ح', 'ن', 'ط', 'ص']],
-                        ['target' => 'و', 'options' => ['و', 'أ', 'ب', 'ت']],
-                        ['target' => 'ي', 'options' => ['س', 'ي', 'م', 'ن']],
-                        ['target' => 'ع', 'options' => ['ع', 'ب', 'ل', 'ك']],
-                        ['target' => 'هـ', 'options' => ['م', 'ن', 'هـ', 'و']],
-                        ['target' => 'ق', 'options' => ['ق', 'أ', 'د', 'ز']],
-                        ['target' => 'س', 'options' => ['م', 'ل', 'س', 'و']],
-                        ['target' => 'ط', 'options' => ['أ', 'ط', 'ف', 'ي']],
-                        ['target' => 'ف', 'options' => ['د', 'ح', 'ف', 'ك']],
-                        ['target' => 'ص', 'options' => ['ص', 'م', 'أ', 'ر']],
-                        ['target' => 'د', 'options' => ['س', 'ع', 'م', 'د']],
-                    ]
-                ], JSON_UNESCAPED_UNICODE),
-            ],
-
-            // 5. تدريب عسر القراءة - مستوى 2 (15 سؤال)
-            [
-                'learning_difficulty_id' => 1,
-                'level_name' => 'تدريب - المستوى المتوسط (القاعدة البنائية)',
-                'difficulty_level' => 2,
-                'content_type' => 'training',
-                'content_data' => json_encode([
-                    'questions' => [
-                        ['target' => 'ح', 'options' => ['ح', 'خ', 'ع', 'غ']],
-                        ['target' => 'ص', 'options' => ['ض', 'ص', 'ط', 'ظ']],
-                        ['target' => 'س', 'options' => ['ش', 'ص', 'س', 'ض']],
-                        ['target' => 'ع', 'options' => ['غ', 'ع', 'ح', 'خ']],
-                        ['target' => 'ط', 'options' => ['ظ', 'ط', 'ص', 'ض']],
-                        ['target' => 'ر', 'options' => ['ز', 'ر', 'و', 'د']],
-                        ['target' => 'د', 'options' => ['ذ', 'د', 'ر', 'ز']],
-                        ['target' => 'ت', 'options' => ['ث', 'ت', 'ب', 'ن']],
-                        ['target' => 'ق', 'options' => ['ف', 'ق', 'غ', 'ع']],
-                        ['target' => 'ظ', 'options' => ['ط', 'ظ', 'ض', 'ص']],
-                        ['target' => 'خ', 'options' => ['ح', 'ج', 'خ', 'ع']],
-                        ['target' => 'ض', 'options' => ['ص', 'ض', 'ظ', 'ط']],
-                        ['target' => 'ش', 'options' => ['س', 'ش', 'ث', 'ق']],
-                        ['target' => 'غ', 'options' => ['ع', 'غ', 'ف', 'ق']],
-                        ['target' => 'ز', 'options' => ['ر', 'ز', 'ذ', 'د']],
-                    ]
-                ], JSON_UNESCAPED_UNICODE),
-            ],
-
-            // 6. تدريب عسر الحساب - مستوى 1 (15 سؤال)
-            [
-                'learning_difficulty_id' => 2,
-                'level_name' => 'تدريب - فرق شاسع (سهل)',
-                'difficulty_level' => 1,
-                'content_type' => 'training',
-                'content_data' => json_encode([
-                    'questions' => [
-                        ['left' => 10, 'right' => 2, 'correct_side' => 'left'],
-                        ['left' => 1, 'right' => 8, 'correct_side' => 'right'],
-                        ['left' => 9, 'right' => 3, 'correct_side' => 'left'],
-                        ['left' => 2, 'right' => 11, 'correct_side' => 'right'],
-                        ['left' => 12, 'right' => 4, 'correct_side' => 'left'],
-                        ['left' => 3, 'right' => 15, 'correct_side' => 'right'],
-                        ['left' => 14, 'right' => 5, 'correct_side' => 'left'],
-                        ['left' => 4, 'right' => 12, 'correct_side' => 'right'],
-                        ['left' => 16, 'right' => 6, 'correct_side' => 'left'],
-                        ['left' => 5, 'right' => 20, 'correct_side' => 'right'],
-                        ['left' => 15, 'right' => 3, 'correct_side' => 'left'],
-                        ['left' => 2, 'right' => 14, 'correct_side' => 'right'],
-                        ['left' => 18, 'right' => 4, 'correct_side' => 'left'],
-                        ['left' => 5, 'right' => 15, 'correct_side' => 'right'],
-                        ['left' => 12, 'right' => 2, 'correct_side' => 'left'],
-                    ]
-                ], JSON_UNESCAPED_UNICODE),
-            ],
-
-            // 7. تدريب عسر الحساب - مستوى 2 (15 سؤال)
-            [
-                'learning_difficulty_id' => 2,
-                'level_name' => 'تدريب - فرق متوسط',
-                'difficulty_level' => 2,
-                'content_type' => 'training',
-                'content_data' => json_encode([
-                    'questions' => [
-                        ['left' => 10, 'right' => 6, 'correct_side' => 'left'],
-                        ['left' => 5, 'right' => 9, 'correct_side' => 'right'],
-                        ['left' => 12, 'right' => 8, 'correct_side' => 'left'],
-                        ['left' => 7, 'right' => 11, 'correct_side' => 'right'],
-                        ['left' => 15, 'right' => 10, 'correct_side' => 'left'],
-                        ['left' => 8, 'right' => 13, 'correct_side' => 'right'],
-                        ['left' => 14, 'right' => 9, 'correct_side' => 'left'],
-                        ['left' => 6, 'right' => 10, 'correct_side' => 'right'],
-                        ['left' => 18, 'right' => 12, 'correct_side' => 'left'],
-                        ['left' => 11, 'right' => 16, 'correct_side' => 'right'],
-                        ['left' => 9, 'right' => 6, 'correct_side' => 'left'],
-                        ['left' => 12, 'right' => 16, 'correct_side' => 'right'],
-                        ['left' => 16, 'right' => 11, 'correct_side' => 'left'],
-                        ['left' => 10, 'right' => 15, 'correct_side' => 'right'],
-                        ['left' => 14, 'right' => 10, 'correct_side' => 'left'],
-                    ]
-                ], JSON_UNESCAPED_UNICODE),
-            ]
+            $this->contentRecord(2, 'التدريب - المستوى السهل (الحساب)', 1, 'training', $this->dyscalculiaTrainingLevelOne()),
+            $this->contentRecord(2, 'التدريب - المستوى المتوسط (الحساب)', 2, 'training', $this->dyscalculiaTrainingLevelTwo()),
+            $this->contentRecord(2, 'التدريب - المستوى المتقدم (الحساب)', 3, 'training', $this->dyscalculiaTrainingLevelThree()),
         ];
 
-        DB::table('game_contents')->insert($contents);
+        DB::table('game_contents')->insert($records);
+    }
+
+    private function contentRecord(int $learningDifficultyId, string $levelName, int $difficultyLevel, string $contentType, array $questions): array
+    {
+        return [
+            'learning_difficulty_id' => $learningDifficultyId,
+            'level_name' => $levelName,
+            'difficulty_level' => $difficultyLevel,
+            'content_type' => $contentType,
+            'content_data' => json_encode([
+                'questions' => $questions,
+            ], JSON_UNESCAPED_UNICODE),
+        ];
+    }
+
+    private function question(string $question, array $options, string $correctAnswer, ?string $category = null): array
+    {
+        $payload = [
+            'question' => $question,
+            'options' => $options,
+            'correct_answer' => $correctAnswer,
+        ];
+
+        if ($category !== null) {
+            $payload['category'] = $category;
+        }
+
+        return $payload;
+    }
+
+    private function assessmentDiagnosticQuestions(): array
+    {
+        return [
+            $this->question('ما الحرف الأول في كلمة "باب"؟', ['ب', 'ت', 'ث', 'ج'], 'ب', 'reading'),
+            $this->question('أكمل الكلمة: ك_تاب', ['ت', 'ب', 'ا', 'م'], 'ت', 'reading'),
+            $this->question('اختر الكلمة الصحيحة: "كتاب"', ['كتاب', 'كتايب', 'كتتب', 'كثاب'], 'كتاب', 'reading'),
+            $this->question('ما الحرف الأخير في كلمة "قلم"؟', ['ق', 'ل', 'م', 'ن'], 'م', 'reading'),
+            $this->question('أي كلمة تبدأ بحرف "ف"؟', ['فراشة', 'شمس', 'بيت', 'قمر'], 'فراشة', 'reading'),
+            $this->question('أي كلمة تدل على مكان التعلم؟', ['مدرسة', 'سيارة', 'شجرة', 'طائرة'], 'مدرسة', 'reading'),
+            $this->question('ما الحرف الناقص في كلمة "_مر"؟', ['ق', 'ك', 'ع', 'ب'], 'ق', 'reading'),
+            $this->question('أي كلمة نقرأ بها القصص؟', ['كتاب', 'قلم', 'كرسي', 'باب'], 'كتاب', 'reading'),
+            $this->question('أي كلمة فيها حرف "ش"؟', ['شمس', 'قمر', 'بيت', 'وردة'], 'شمس', 'reading'),
+
+            $this->question('ما العدد التالي بعد 7؟', ['6', '7', '8', '9'], '8', 'math'),
+            $this->question('كم عدد أصابع يد الطفل الواحدة؟', ['4', '5', '6', '7'], '5', 'math'),
+            $this->question('أي عدد أكبر: 14 أم 11؟', ['14', '11', '12', '13'], '14', 'math'),
+            $this->question('ما الناتج: 2 + 3؟', ['4', '5', '6', '7'], '5', 'math'),
+            $this->question('ما الناتج: 6 - 2؟', ['2', '3', '4', '5'], '4', 'math'),
+            $this->question('ما العدد الناقص في النمط: 1، 3، 5، __؟', ['6', '7', '8', '9'], '7', 'math'),
+            $this->question('ما الناتج: 4 + 4؟', ['6', '7', '8', '9'], '8', 'math'),
+            $this->question('أي عدد أصغر: 8 أم 5؟', ['8', '5', '6', '7'], '5', 'math'),
+            $this->question('ما العدد التالي في النمط: 10، 20، 30، __؟', ['35', '40', '45', '50'], '40', 'math'),
+        ];
+    }
+
+    private function dyslexiaTrainingLevelOne(): array
+    {
+        return [
+            $this->question('اختر الحرف الصحيح في كلمة "باب"', ['ب', 'ت', 'ث', 'ج'], 'ب', 'letter'),
+            $this->question('ما الحرف الأول في كلمة "قلم"', ['ق', 'ل', 'م', 'ن'], 'ق', 'letter'),
+            $this->question('ما الحرف الأخير في كلمة "نور"', ['ن', 'و', 'ر', 'م'], 'ر', 'letter'),
+            $this->question('اختر الحرف الصحيح في كلمة "بيت"', ['ب', 'ت', 'ث', 'ط'], 'ب', 'letter'),
+            $this->question('ما الحرف الأوسط في كلمة "سمك"', ['س', 'م', 'ك', 'ن'], 'م', 'letter'),
+            $this->question('أي حرف تبدأ به كلمة "فم"؟', ['ف', 'م', 'ن', 'ب'], 'ف', 'letter'),
+            $this->question('أي حرف تنتهي به كلمة "شجرة"؟', ['ة', 'ر', 'ش', 'ج'], 'ة', 'letter'),
+            $this->question('اختر الحرف الصحيح في كلمة "طير"', ['ط', 'ت', 'ظ', 'ض'], 'ط', 'letter'),
+            $this->question('ما الحرف الأول في كلمة "ذهب"', ['ذ', 'ز', 'د', 'ر'], 'ذ', 'letter'),
+            $this->question('ما الحرف الأول في كلمة "كتاب"', ['ك', 'ت', 'ا', 'ب'], 'ك', 'letter'),
+        ];
+    }
+
+    private function dyslexiaTrainingLevelTwo(): array
+    {
+        return [
+            $this->question('أكمل الكلمة: م_درسة', ['د', 'ر', 'س', 'ة'], 'د', 'word'),
+            $this->question('اختر الكلمة الصحيحة: "وردة"', ['وردة', 'ورده', 'وردا', 'وردت'], 'وردة', 'word'),
+            $this->question('ما الحرف الأوسط في كلمة "قلم"؟', ['ل', 'ق', 'م', 'ب'], 'ل', 'word'),
+            $this->question('أي كلمة تبدأ بحرف "ث"؟', ['ثوب', 'بيت', 'قلم', 'شمس'], 'ثوب', 'word'),
+            $this->question('ما الحرف الأخير في كلمة "مدرسة"؟', ['ة', 'م', 'س', 'د'], 'ة', 'word'),
+            $this->question('أي كلمة فيها حرف "ف"؟', ['فراشة', 'شجرة', 'بيت', 'قمر'], 'فراشة', 'word'),
+            $this->question('أي كلمة فيها ثلاثة أحرف؟', ['بيت', 'مدرسة', 'شجرة', 'تفاحة'], 'بيت', 'word'),
+            $this->question('اختر الكلمة الصحيحة: "طفل"', ['طفل', 'طفيل', 'طفلٌ', 'طفي'], 'طفل', 'word'),
+            $this->question('أي كلمة تبدأ بحرف "ص"؟', ['صقر', 'قمر', 'بيت', 'شمس'], 'صقر', 'word'),
+            $this->question('أي كلمة تعني مكان التعلم؟', ['مدرسة', 'سيارة', 'قمر', 'تفاحة'], 'مدرسة', 'word'),
+        ];
+    }
+
+    private function dyslexiaTrainingLevelThree(): array
+    {
+        return [
+            $this->question('اختر الكلمة الصحيحة: "شجرة"', ['شجرة', 'شجره', 'شجيرة', 'شجرات'], 'شجرة', 'reading'),
+            $this->question('ما الحرف الأول في كلمة "مدرسة"؟', ['م', 'د', 'ر', 'س'], 'م', 'reading'),
+            $this->question('أي كلمة فيها حرف "ع"؟', ['عصفور', 'قمر', 'بيت', 'شمس'], 'عصفور', 'reading'),
+            $this->question('أكمل الكلمة: فرا_ة', ['ش', 'س', 'ز', 'ب'], 'ش', 'reading'),
+            $this->question('ما الحرف الأخير في كلمة "طائرة"؟', ['ة', 'ر', 'ط', 'ا'], 'ة', 'reading'),
+            $this->question('أي كلمة تدل على مكان الدراسة؟', ['مدرسة', 'سيارة', 'طائرة', 'شجرة'], 'مدرسة', 'reading'),
+            $this->question('أي كلمة تبدأ بحرف "خ"؟', ['خيمة', 'بيت', 'قمر', 'ورد'], 'خيمة', 'reading'),
+            $this->question('أي كلمة فيها حرف "ذ"؟', ['ذهب', 'باب', 'قلم', 'شمس'], 'ذهب', 'reading'),
+            $this->question('أي كلمة فيها أربعة أحرف؟', ['قمر', 'نور', 'كتاب', 'بيت'], 'كتاب', 'reading'),
+            $this->question('أي كلمة نستخدمها لقراءة القصص؟', ['كتاب', 'قلم', 'باب', 'طاولة'], 'كتاب', 'reading'),
+        ];
+    }
+
+    private function dyscalculiaTrainingLevelOne(): array
+    {
+        return [
+            $this->question('ما العدد التالي بعد 1؟', ['2', '3', '4', '5'], '2', 'number'),
+            $this->question('كم عدد أصابع اليد الواحدة؟', ['4', '5', '6', '7'], '5', 'number'),
+            $this->question('أي عدد أكبر: 4 أم 7؟', ['4', '7', '5', '6'], '7', 'number'),
+            $this->question('أي عدد أصغر: 9 أم 6؟', ['9', '6', '7', '8'], '6', 'number'),
+            $this->question('ما الناتج: 1 + 2؟', ['2', '3', '4', '5'], '3', 'number'),
+            $this->question('ما الناتج: 5 - 1؟', ['2', '3', '4', '5'], '4', 'number'),
+            $this->question('ما العدد الناقص في النمط: 2، 3، __، 5؟', ['4', '5', '6', '3'], '4', 'number'),
+            $this->question('أي رقم يمثل العدد خمسة؟', ['3', '4', '5', '6'], '5', 'number'),
+            $this->question('ما العدد التالي بعد 14؟', ['13', '14', '15', '16'], '15', 'number'),
+            $this->question('ما الناتج: 6 - 3؟', ['1', '2', '3', '4'], '3', 'number'),
+        ];
+    }
+
+    private function dyscalculiaTrainingLevelTwo(): array
+    {
+        return [
+            $this->question('ما العدد التالي في النمط: 2، 4، 6، __؟', ['7', '8', '9', '10'], '8', 'number'),
+            $this->question('ما الناتج: 10 + 1؟', ['10', '11', '12', '13'], '11', 'number'),
+            $this->question('ما الناتج: 9 - 3؟', ['5', '6', '7', '8'], '6', 'number'),
+            $this->question('أي عدد أكبر: 13 أم 15؟', ['13', '14', '15', '16'], '15', 'number'),
+            $this->question('ما الناتج: 7 + 2؟', ['8', '9', '10', '11'], '9', 'number'),
+            $this->question('ما الناتج: 8 - 5؟', ['1', '2', '3', '4'], '3', 'number'),
+            $this->question('ما العدد التالي في النمط: 5، 10، 15، __؟', ['18', '19', '20', '25'], '20', 'number'),
+            $this->question('ما العدد التالي بعد 19؟', ['18', '19', '20', '21'], '20', 'number'),
+            $this->question('ما العدد التالي في النمط: 6، 7، 8، __؟', ['8', '9', '10', '11'], '9', 'number'),
+            $this->question('ما الناتج: 2 + 6؟', ['6', '7', '8', '9'], '8', 'number'),
+        ];
+    }
+
+    private function dyscalculiaTrainingLevelThree(): array
+    {
+        return [
+            $this->question('ما الناتج: 12 + 3؟', ['14', '15', '16', '17'], '15', 'number'),
+            $this->question('ما الناتج: 18 - 4؟', ['12', '13', '14', '15'], '14', 'number'),
+            $this->question('أي عدد أكبر: 24 أم 42؟', ['24', '42', '26', '40'], '42', 'number'),
+            $this->question('ما الناتج: 7 + 6؟', ['11', '12', '13', '14'], '13', 'number'),
+            $this->question('ما الناتج: 20 - 9؟', ['9', '10', '11', '12'], '11', 'number'),
+            $this->question('ما العدد التالي في النمط: 3، 6، 9، __؟', ['10', '11', '12', '15'], '12', 'number'),
+            $this->question('ما الناتج: 14 + 2؟', ['15', '16', '17', '18'], '16', 'number'),
+            $this->question('ما الناتج: 30 - 5؟', ['20', '22', '25', '26'], '25', 'number'),
+            $this->question('أي عدد أصغر: 27 أم 29؟', ['27', '28', '29', '30'], '27', 'number'),
+            $this->question('ما العدد التالي في النمط: 2، 4، 8، __؟', ['12', '14', '16', '10'], '16', 'number'),
+        ];
     }
 }

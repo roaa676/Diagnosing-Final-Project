@@ -45,6 +45,19 @@ interface AssessmentState {
     timeElapsed: number;
 }
 
+interface CategoryAssessmentSummary {
+    correct_count: number;
+    total_questions: number;
+    percentage: number;
+}
+
+interface AssessmentDiagnosisSummary {
+    diagnosis_type: 'reading_difficulty' | 'math_difficulty' | 'both_difficulties' | 'no_significant_difficulty';
+    recommendation: string;
+    reading: CategoryAssessmentSummary;
+    math: CategoryAssessmentSummary;
+}
+
 @Component({
     selector: 'app-assessment',
     standalone: true,
@@ -68,6 +81,8 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     resultSaved = false;
     resultErrorMessage = '';
     difficultyId = 0;
+    difficulty_level: any;
+    currentLevel: number = 0;
     childId = 0;
     currentQuestion: Question | null = null;
     selectedOption: SelectedAnswer = null;
@@ -76,10 +91,14 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     maxScore = 0;
     scorePercentage = 0;
     correctAnswersCount = 0;
+    assessmentDiagnosis: AssessmentDiagnosisSummary | null = null;
+    readingScorePercentage = 0;
+    mathScorePercentage = 0;
     difficultyName = '';
     greetingMessage = 'مرحباً يا بطل!';
     totalTime = 0;
     playingAudio = false;
+    reviewMode = false;
 
     private readonly defaultQuestionTime = 30;
     private readonly defaultQuestionPoints = 10;
@@ -91,33 +110,17 @@ export class AssessmentComponent implements OnInit, OnDestroy {
         private assessmentService: AssessmentService,
         public router: Router,
         private route: ActivatedRoute
-    ) {}
+    ) { }
 
     ngOnInit(): void {
-        // أولاً نحاول نجيب آخر نتيجة محفوظة
         this.loadLastAssessmentIfExists();
     }
 
-    // onShowQuestions(): void {
-    //     console.log('[Assessment] onShowQuestions() clicked');
-    //     this.submitted = false;
-    //     this.loading = true;
-    //     this.errorMessage = '';
-    //     this.loadAssessment();
-    // }
-
-
-
-    /**
-     * لو فيه نتيجة assessment محفوظة قبل كده للطفل + game_type (difficultyId)
-     * هنظهر شاشة النتائج بدون فتح أسئلة التقييم.
-     */
     private loadLastAssessmentIfExists(): void {
         const difficultyId = this.getNumericQueryParam('difficultyId') ?? this.getStoredDifficultyId();
         const childId = this.getNumericQueryParam('childId') ?? this.getStoredChildId();
 
         if (!difficultyId || !childId) {
-            // لو طفل جديد/مفيش ids متاحة لحد دلوقتي هنكمل تحميل الأسئلة بالطريقة القديمة
             this.loadAssessment();
             return;
         }
@@ -137,26 +140,30 @@ export class AssessmentComponent implements OnInit, OnDestroy {
                     const data = res?.data;
                     if (data?.raw_score !== undefined && data?.raw_score !== null) {
                         this.submitted = true;
+                        this.reviewMode = true;
                         this.loading = false;
                         this.totalScore = Number(data.raw_score) || 0;
-                        // maxScore/scorePercentage/الإجابات الصحيحة هنتعامل معها لما نعمل load للأسئلة
-                        this.scorePercentage = 0;
-                        this.correctAnswersCount = 0;
+
+                        this.correctAnswersCount = Number(data.correct_count) || 0;
+
+                        const totalQuestions = Number(data.total_questions) || 0;
+
+                        this.scorePercentage =
+                            totalQuestions > 0
+                                ? Math.round((this.correctAnswersCount / totalQuestions) * 100)
+                                : 0;
+                        this.assessmentDiagnosis = data?.diagnosis ?? this.assessmentDiagnosis;
                         this.totalTime = 0;
                         return;
                     }
-
-                    // مفيش نتيجة محفوظة: نكمل تحميل الأسئلة
                     this.loadAssessment();
                 },
 
                 error: () => {
-                    // لو فشلنا في جلب النتيجة: نعمل كـ fallback تحميل أسئلة التقييم
                     this.loadAssessment();
                 }
             });
     }
-
 
     ngOnDestroy(): void {
         this.destroy$.next();
@@ -184,12 +191,10 @@ export class AssessmentComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (response) => {
+                    console.log('FULL RESPONSE', response);
                     const content = response.data;
-
-                    // backend يرجع data كمصفوفة levels (التقييم المبدئي)
                     const selectedLevel = Array.isArray(content) ? content[0] : (content as any);
-
-                    // Debug سريع لمعرفة شكل response وكيفية ظهور الأسئلة
+                    this.currentLevel = selectedLevel?.difficulty_level ?? 0;
                     console.log('assessment response.data =', content);
                     console.log('selectedLevel =', selectedLevel);
                     console.log('first question =', selectedLevel?.questions?.[0]);
@@ -217,6 +222,9 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     }
 
     selectOption(optionId: OptionId): void {
+        if (this.reviewMode) {
+            return;
+        }
         this.selectedOption = optionId;
     }
 
@@ -358,6 +366,10 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     }
 
     getResultMessage(): string {
+        if (this.assessmentDiagnosis) {
+            return this.assessmentDiagnosis.recommendation;
+        }
+
         if (this.scorePercentage >= 80) {
             return 'ممتاز جداً! أداء الطفل رائع.';
         }
@@ -368,8 +380,9 @@ export class AssessmentComponent implements OnInit, OnDestroy {
 
         return 'يحتاج الطفل إلى تدريب إضافي ومتابعة مستمرة.';
     }
-    
+
     onShowQuestions(): void {
+        this.reviewMode = true;
         this.submitted = false;
         this.loading = true;
         this.errorMessage = '';
@@ -382,7 +395,7 @@ export class AssessmentComponent implements OnInit, OnDestroy {
 
 
     navigateToQuestionnaire(): void {
-        this.router.navigate(['/questionnaire'], {
+        this.router.navigate(['/questionnaire', this.childId || 1], {
             queryParams: {
                 childId: this.childId || null,
                 difficultyId: this.difficultyId || null
@@ -493,7 +506,8 @@ export class AssessmentComponent implements OnInit, OnDestroy {
             this.state.timeElapsed += 1;
 
             if (this.timeRemaining <= 0) {
-                this.nextQuestion();
+                this.timeRemaining = 0;
+                this.stopTimer();
             }
         }, 1000);
     }
@@ -521,7 +535,7 @@ export class AssessmentComponent implements OnInit, OnDestroy {
         }
 
         const selectedAnswer = this.getCurrentSelectedAnswer();
-        const isCorrect = selectedAnswer !== null && this.isAnswerCorrect(selectedAnswer, this.currentQuestion.correct_answer);
+        const isCorrect = selectedAnswer !== null && this.isAnswerCorrect(selectedAnswer, this.currentQuestion);
         const points = isCorrect ? this.currentQuestion.points : 0;
 
         this.state.answers[this.currentQuestion.id] = {
@@ -533,6 +547,9 @@ export class AssessmentComponent implements OnInit, OnDestroy {
         };
 
         this.recalculateScore();
+        this.totalScore = this.state.score;
+
+        console.log(`[Assessment] Question ${this.currentQuestion.id} Answered. Correct: ${isCorrect}, Points: ${points}. Total Score now: ${this.totalScore}`);
     }
 
     private getCurrentSelectedAnswer(): SelectedAnswer {
@@ -559,7 +576,8 @@ export class AssessmentComponent implements OnInit, OnDestroy {
         return this.currentQuestion.options.map((option) => option.id);
     }
 
-    private isAnswerCorrect(selectedAnswer: Exclude<SelectedAnswer, null>, correctAnswer?: OptionId | OptionId[]): boolean {
+    private isAnswerCorrect(selectedAnswer: Exclude<SelectedAnswer, null>, question: Question): boolean {
+        const correctAnswer = question.correct_answer;
         if (correctAnswer === undefined) {
             return false;
         }
@@ -569,7 +587,13 @@ export class AssessmentComponent implements OnInit, OnDestroy {
                 return false;
             }
 
-            return correctAnswer.every((answer, index) => this.isSameValue(answer, selectedAnswer[index]));
+            if (this.isOrderingQuestion(question)) {
+                return correctAnswer.every((answer, index) => this.isSameValue(answer, selectedAnswer[index]));
+            }
+
+            return correctAnswer.every((answer) =>
+                selectedAnswer.some((selected) => this.isSameValue(answer, selected))
+            );
         }
 
         return !Array.isArray(selectedAnswer) && this.isSameValue(selectedAnswer, correctAnswer);
@@ -580,77 +604,96 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     }
 
     private finishAssessment(): void {
+        this.stopTimer();
+        this.recalculateScore();
+
         this.submitted = true;
         this.totalScore = this.state.score;
         this.correctAnswersCount = Object.values(this.state.answers).filter((answer) => answer.isCorrect).length;
+
         this.scorePercentage = this.maxScore > 0 ? Math.round((this.totalScore / this.maxScore) * 100) : 0;
 
-        console.log('[Assessment] finishAssessment()', {
-            totalScore: this.totalScore,
-            maxScore: this.maxScore,
-            scorePercentage: this.scorePercentage,
-            childId: this.childId,
-            difficultyId: this.difficultyId
-        });
+        this.assessmentDiagnosis = this.calculateAssessmentDiagnosis();
+        this.readingScorePercentage =
+            this.assessmentDiagnosis.reading.percentage;
+
+        this.mathScorePercentage =
+            this.assessmentDiagnosis.math.percentage;
 
         this.submitAssessmentResult();
     }
 
 
     private submitAssessmentResult(): void {
-        // محاولة تصحيح القيم قبل الإرسال (حل مشكلة wrong/undefined ids)
         const queryChildId = this.getNumericQueryParam('childId');
         const queryDifficultyId = this.getNumericQueryParam('difficultyId');
 
         const storedChildId = this.getStoredChildId();
         const storedDifficultyId = this.getStoredDifficultyId();
 
-        const resolvedChildId = queryChildId ?? storedChildId ?? this.childId;
-        const resolvedDifficultyId = queryDifficultyId ?? storedDifficultyId ?? this.difficultyId;
+        this.childId = queryChildId ?? storedChildId ?? this.childId ?? 0;
+        this.difficultyId = queryDifficultyId ?? storedDifficultyId ?? this.difficultyId ?? 0;
 
-        this.childId = resolvedChildId || 0;
-        this.difficultyId = resolvedDifficultyId || 0;
+        const finalScoreToSend =
+            this.questions.length > 0
+                ? Math.round((this.correctAnswersCount / this.questions.length) * 100)
+                : 0;
+        const diagnosis = this.assessmentDiagnosis ?? this.calculateAssessmentDiagnosis();
 
-        console.log('[Assessment] submitAssessmentResult called (resolved ids)', {
-            childId: this.childId,
-            difficultyId: this.difficultyId,
-            totalScore: this.totalScore,
-            queryChildId,
-            queryDifficultyId,
-            storedChildId,
-            storedDifficultyId
+        console.log('[Assessment] Sending API Request -> submitAssessmentResult', {
+            child_id: this.childId,
+            game_type: String(this.difficultyId),
+            raw_score: finalScoreToSend,
+            reading_correct_count: diagnosis.reading.correct_count,
+            reading_total_questions: diagnosis.reading.total_questions,
+            reading_percentage: diagnosis.reading.percentage,
+            math_correct_count: diagnosis.math.correct_count,
+            math_total_questions: diagnosis.math.total_questions,
+            math_percentage: diagnosis.math.percentage
         });
 
         if (!this.childId || !this.difficultyId) {
-            // مش هنمنع/هنظهر رسالة UI؛ هنستمر لكن request غالبًا سترفض.
-            // الأهم: هنترك errorMessage فارغة عشان لا تظهر.
-            this.submittingResult = false;
-            this.resultSaved = false;
-            this.resultErrorMessage = '';
-            console.warn('[Assessment] submitAssessmentResult blocked (ids missing)', {
-                childId: this.childId,
-                difficultyId: this.difficultyId
-            });
+            console.warn('[Assessment] submitAssessmentResult blocked: missing childId or difficultyId');
             return;
         }
-
-
 
         this.submittingResult = true;
         this.resultSaved = false;
         this.resultErrorMessage = '';
 
+        const payload: any = {
+            child_id: this.childId,
+            game_type: this.getGameType(),
+            raw_score: finalScoreToSend,
+            session_type: 'assessment',
+            learning_difficulty_id: this.difficultyId,
+            difficulty_level: this.currentLevel,
+            correct_count: this.correctAnswersCount,
+            total_questions: this.questions.length,
+            reading_correct_count: diagnosis.reading.correct_count,
+            reading_total_questions: diagnosis.reading.total_questions,
+            reading_percentage: diagnosis.reading.percentage,
+            math_correct_count: diagnosis.math.correct_count,
+            math_total_questions: diagnosis.math.total_questions,
+            math_percentage: diagnosis.math.percentage,
+        };
+
         this.assessmentService
-            .submitAssessmentResult({
-                child_id: this.childId,
-                game_type: String(this.difficultyId),
-                raw_score: this.totalScore
-            })
+            .submitAssessmentResult(payload)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: () => {
+                next: (res) => {
                     this.submittingResult = false;
                     this.resultSaved = true;
+                    this.assessmentDiagnosis = res?.diagnosis ?? this.assessmentDiagnosis;
+                    if (this.assessmentDiagnosis) {
+
+                        this.readingScorePercentage =
+                            this.assessmentDiagnosis.reading?.percentage ?? 0;
+
+                        this.mathScorePercentage =
+                            this.assessmentDiagnosis.math?.percentage ?? 0;
+                    }
                 },
                 error: (error) => {
                     this.submittingResult = false;
@@ -658,6 +701,59 @@ export class AssessmentComponent implements OnInit, OnDestroy {
                     this.resultErrorMessage = error?.error?.message || 'تم عرض النتيجة، لكن تعذر حفظها على الخادم';
                 }
             });
+    }
+
+    private getGameType(): string {
+        const map: Record<number, string> = {
+            1: 'visual_discrimination',
+            2: 'number_direction'
+        };
+
+        return map[this.difficultyId] ?? 'unknown';
+    }
+
+    private calculateAssessmentDiagnosis(): AssessmentDiagnosisSummary {
+        const weakThreshold = 60;
+        const readingQuestions = this.questions.filter((question) => (question.category ?? '').toLowerCase() === 'reading');
+        const mathQuestions = this.questions.filter((question) => (question.category ?? '').toLowerCase() === 'math');
+
+        const readingCorrect = readingQuestions.filter((question) => this.state.answers[question.id]?.isCorrect).length;
+        const mathCorrect = mathQuestions.filter((question) => this.state.answers[question.id]?.isCorrect).length;
+
+        const readingSummary = this.buildCategorySummary(readingCorrect, readingQuestions.length);
+        const mathSummary = this.buildCategorySummary(mathCorrect, mathQuestions.length);
+
+        const readingWeak = readingSummary.total_questions > 0 && readingSummary.percentage < weakThreshold;
+        const mathWeak = mathSummary.total_questions > 0 && mathSummary.percentage < weakThreshold;
+
+        let diagnosisType: AssessmentDiagnosisSummary['diagnosis_type'] = 'no_significant_difficulty';
+        let recommendation = 'لا توجد مؤشرات واضحة على صعوبة محددة حاليًا.';
+
+        if (readingWeak && mathWeak) {
+            diagnosisType = 'both_difficulties';
+            recommendation = 'يوصى بالاستمرار في تدريبات القراءة والحساب';
+        } else if (readingWeak) {
+            diagnosisType = 'reading_difficulty';
+            recommendation = 'يوصى بالاستمرار في تدريبات القراءة';
+        } else if (mathWeak) {
+            diagnosisType = 'math_difficulty';
+            recommendation = 'يوصى بالاستمرار في تدريبات الحساب';
+        }
+
+        return {
+            diagnosis_type: diagnosisType,
+            recommendation,
+            reading: readingSummary,
+            math: mathSummary,
+        };
+    }
+
+    private buildCategorySummary(correctCount: number, totalQuestions: number): CategoryAssessmentSummary {
+        return {
+            correct_count: correctCount,
+            total_questions: totalQuestions,
+            percentage: totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0,
+        };
     }
 
     private isSpecialQuestion(question: Question): boolean {
@@ -747,6 +843,68 @@ export class AssessmentComponent implements OnInit, OnDestroy {
             localStorage.setItem('selected_difficulty_id', String(this.difficultyId));
         } catch {
             return;
+        }
+    }
+
+    get readingPercentage(): number {
+        return this.readingScorePercentage ?? 0;
+    }
+
+    get mathPercentage(): number {
+        return this.mathScorePercentage ?? 0;
+    }
+
+    get readingStatus(): string {
+        if (this.readingPercentage >= 70) return 'نقطة قوة';
+        if (this.readingPercentage >= 40) return 'فرصة للتطوير';
+        return 'تحتاج للدعم';
+    }
+
+    get mathStatus(): string {
+        if (this.mathPercentage >= 70) return 'نقطة قوة';
+        if (this.mathPercentage >= 40) return 'فرصة للتطوير';
+        return 'تحتاج للدعم';
+    }
+
+    get readingMessage(): string {
+        if (this.readingPercentage >= 70) {
+            return 'أداء طفلك متميز في مهارات القراءة.';
+        }
+
+        if (this.readingPercentage >= 40) {
+            return 'يحرز طفلك تقدماً جيداً في القراءة.';
+        }
+
+        return 'مهارات القراءة تحتاج إلى دعم إضافي.';
+    }
+
+    get mathMessage(): string {
+        if (this.mathPercentage >= 70) {
+            return 'أداء طفلك جيد جداً في الحساب.';
+        }
+
+        if (this.mathPercentage >= 40) {
+            return 'يوجد تقدم جيد في مهارات الحساب.';
+        }
+
+        return 'مهارات الحساب تحتاج إلى خطة دعم إضافية.';
+    }
+
+    get diagnosisLabel(): string {
+
+        switch (this.assessmentDiagnosis?.diagnosis_type) {
+
+            case 'reading_difficulty':
+                return 'صعوبة القراءة';
+
+            case 'math_difficulty':
+                return 'صعوبة الحساب';
+
+            case 'both_difficulties':
+                return 'صعوبات متعددة';
+
+            default:
+                return 'لا توجد صعوبات واضحة';
         }
     }
 }

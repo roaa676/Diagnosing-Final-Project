@@ -35,40 +35,36 @@ export interface TrainingResponse {
 export class TrainingService {
   private apiUrl = 'http://127.0.0.1:8000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  /**
-   * Get training roadmap for a child
-   */
+
   getTrainingRoadmap(childId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/training/roadmap/${childId}`);
   }
 
-  /**
-   * Get game content for a specific difficulty and level
-   */
+
   getGameContent(difficultyId: number, level: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/game-content/${difficultyId}/${level}`);
   }
 
-  /**
-   * Mark a training level as complete
-   */
+
   completeTrainingLevel(childId: number, trainingType: string): Observable<TrainingResponse> {
     return this.http.post<TrainingResponse>(`${this.apiUrl}/training/complete`, {
       child_id: childId,
       training_type: trainingType
     });
   }
+  getTrainingResults(
+    childId: number,
+    difficultyId: number
+  ): Observable<any> {
 
-  /**
-   * Submit game result/score
-   */
-  submitGameResult(childId: number, gameType: string, rawScore: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/submit-game-result`, {
-      child_id: childId,
-      game_type: gameType,
-      raw_score: rawScore
-    });
+    return this.http.get(
+      `${this.apiUrl}/training/results/${childId}?difficulty_id=${difficultyId}`
+    );
+  }
+
+  submitGameResult(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/submit-game-result`, payload);
   }
 }

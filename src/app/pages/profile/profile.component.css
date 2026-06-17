@@ -7,9 +7,9 @@
 }
 
 .profile-page {
-    max-width: 1280px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 3.2rem 1.5rem 3rem;
+    padding: 2rem 2rem 3rem;
 }
 
 .profile-hero {
@@ -33,14 +33,26 @@
 }
 
 .profile-layout {
+    width: 100%;
+}
+
+.profile-top-grid {
     display: grid;
-    grid-template-columns: 290px minmax(0, 1fr);
-    gap: 1.6rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
     align-items: start;
+    margin-bottom: 1.5rem;
+}
+
+.profile-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .profile-sidebar {
-    position: sticky;
+    position: static;
     top: 2rem;
 }
 
@@ -88,10 +100,12 @@
 }
 
 .profile-card {
+    width: 100%;
+    height: 100%;
     border: 1px solid #e4e8ee;
     border-radius: 1.3rem;
-    background: #ffffff;
-    padding: 1.45rem;
+    background: #fff;
+    padding: 2rem;
 }
 
 .profile-card__head {
@@ -163,12 +177,6 @@
 .section-icon--amber {
     background: #fdf0c9;
     color: #d97706;
-}
-
-.profile-card--personal,
-.profile-card--children,
-.profile-card--notifications {
-    min-height: 26rem;
 }
 
 .profile-form {
@@ -334,15 +342,55 @@
     padding: 0.8rem 1rem;
 }
 
+.profile-content {
+    width: 100%;
+}
+
 .support-layout {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
 }
 
 .profile-card--support,
 .profile-card--logout {
-    min-height: 22rem;
+    min-height: 320px;
+}
+
+/* التنسيق الجديد للوصف بعد إخراجه من الهيد */
+.profile-card__description {
+    margin: 0 0 1.5rem 0;
+    /* مسافة من الأسفل لإبعاد العناصر التالية */
+    font-size: 1.28rem;
+    line-height: 1.55;
+    color: #6b7a90;
+    text-align: right;
+}
+
+.profile-card--logout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.profile-card--logout .profile-card__head {
+    justify-content: flex-start;
+}
+
+.profile-card--logout .profile-card__title-wrap {
+    display: flex;
+    align-items: center;
+}
+
+
+
+.profile-card--logout .profile-card__head {
+    justify-content: flex-start;
+}
+
+.profile-card--logout .profile-card__title-wrap {
+    display: flex;
+    align-items: center;
 }
 
 .support-list {
@@ -364,13 +412,20 @@
 
 .logout-button.p-button {
     width: 100%;
-    margin-top: auto;
+    /* margin-top: -10px; */
     border-radius: 0.95rem;
+    border: 1px solid #fdeced;
     background: #fdeced;
     color: #ef4444;
-    font-size: 1.3rem;
-    font-weight: 600;
-    padding: 0.78rem 1rem;
+    font-size: 1.28rem;
+    font-weight: 500;
+    padding: 0.72rem 0.95rem;
+    transition: all 0.2s ease-in-out;
+}
+.logout-button.p-button:hover {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #ef4444 !important;
 }
 
 .profile-card--notifications {
@@ -392,7 +447,7 @@
     padding: 1.15rem 0.2rem;
 }
 
-.notification-item + .notification-item {
+.notification-item+.notification-item {
     border-top: 1px solid #e6ebf1;
 }
 
@@ -482,6 +537,7 @@
 }
 
 @media (max-width: 640px) {
+
     .profile-nav__button.p-button,
     .field label,
     .profile-add-button.p-button,

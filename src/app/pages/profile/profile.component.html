@@ -5,178 +5,174 @@
     </section>
 
     <main class="profile-layout">
-        <aside class="profile-sidebar">
-            <nav class="profile-nav">
-                <button
-                    *ngFor="let item of navigationItems"
-                    pButton
-                    type="button"
-                    [label]="item.label"
-                    [icon]="item.icon"
-                    iconPos="right"
-                    [ngClass]="navButtonClass(item)"
-                    (click)="setActiveSection(item.fragment)"
-                ></button>
-            </nav>
-        </aside>
 
         <section class="profile-content">
-            <article *ngIf="activeSection === 'personal-info'" class="profile-card profile-card--personal">
-                <div class="profile-card__head">
-                    <div class="profile-card__title-wrap">
-                        <p-avatar icon="pi pi-user" styleClass="section-icon section-icon--green"></p-avatar>
-                        <div class="profile-card__title-copy">
-                            <h2>المعلومات الشخصية</h2>
-                        </div>
-                    </div>
-                </div>
-
-                <form class="profile-form" [formGroup]="profileForm">
-                    <div class="profile-form__grid">
-                        <div class="field">
-                            <label for="guardianName">اسم ولي الأمر</label>
-                            <input id="guardianName" pInputText type="text" formControlName="guardianName" class="profile-input" />
-                        </div>
-
-                        <div class="field">
-                            <label for="email">البريد الإلكتروني</label>
-                            <input id="email" pInputText type="email" formControlName="email" class="profile-input" />
-                        </div>
-
-                        <div class="field field--full">
-                            <label for="password">كلمة المرور</label>
-                            <p-password
-                                inputId="password"
-                                formControlName="password"
-                                [feedback]="false"
-                                [toggleMask]="true"
-                                styleClass="profile-password"
-                                inputStyleClass="profile-input"
-                            ></p-password>
-                        </div>
-                    </div>
-
-                    <div class="profile-form__actions">
-                        <button
-                            pButton
-                            type="button"
-                            label="حفظ التغييرات"
-                            icon="pi pi-save"
-                            iconPos="right"
-                            class="profile-save-button"
-                            (click)="saveProfile()"
-                        ></button>
-                    </div>
-                </form>
-            </article>
-
-            <article *ngIf="activeSection === 'children'" class="profile-card profile-card--children">
-                <div class="profile-card__head profile-card__head--split">
-                    <div class="profile-card__title-wrap">
-                        <p-avatar icon="pi pi-users" styleClass="section-icon section-icon--purple"></p-avatar>
-                        <div class="profile-card__title-copy">
-                            <h2>إدارة الأطفال</h2>
-                        </div>
-                    </div>
-
-                    <button
-                        pButton
-                        type="button"
-                        label="إضافة طفل جديد"
-                        icon="pi pi-user-plus"
-                        iconPos="right"
-                        class="profile-add-button"
-                        (click)="addChild()"
-                    ></button>
-                </div>
-
-                <div class="children-list">
-                    <article class="child-row" *ngFor="let child of childProfiles; trackBy: trackByChild">
-                        <button pButton type="button" icon="pi pi-pencil" class="child-edit-button" (click)="editChild(child)"></button>
-
-                        <div class="child-row__content">
-                            <div class="child-row__copy">
-                                <h3>{{ child.name }}</h3>
-                                <span>{{ child.details }}</span>
+            <div class="profile-top-grid">
+                <article class="profile-card profile-card--personal">
+                    <div class="profile-card__head">
+                        <div class="profile-card__title-wrap">
+                            <p-avatar icon="pi pi-user" styleClass="section-icon section-icon--green"></p-avatar>
+                            <div class="profile-card__title-copy">
+                                <h2>المعلومات الشخصية</h2>
                             </div>
-                            <p-avatar [image]="child.avatar" styleClass="child-avatar"></p-avatar>
                         </div>
+                    </div>
+
+                    <form class="profile-form" [formGroup]="profileForm">
+                        <div class="profile-form__grid">
+                            <div class="field">
+                                <label for="guardianName">اسم ولي الأمر</label>
+                                <input id="guardianName" pInputText type="text" formControlName="guardianName"
+                                    class="profile-input" />
+                            </div>
+
+                            <div class="field">
+                                <label for="email">البريد الإلكتروني</label>
+                                <input id="email" pInputText type="email" formControlName="email"
+                                    class="profile-input" />
+                            </div>
+
+                            <div class="field field--full">
+                                <label for="password">كلمة المرور</label>
+                                <p-password inputId="password" formControlName="password" [feedback]="false"
+                                    [toggleMask]="true" styleClass="profile-password"
+                                    inputStyleClass="profile-input"></p-password>
+                            </div>
+                        </div>
+
+                        <div class="profile-form__actions">
+                            <button pButton type="button" label="حفظ التغييرات" icon="pi pi-save" iconPos="right"
+                                class="profile-save-button" (click)="saveProfile()"></button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="profile-card profile-card--children">
+                    <div class="profile-card__head profile-card__head--split">
+                        <div class="profile-card__title-wrap">
+                            <p-avatar icon="pi pi-users" styleClass="section-icon section-icon--purple"></p-avatar>
+                            <div class="profile-card__title-copy">
+                                <h2>إدارة الأطفال</h2>
+                            </div>
+                        </div>
+
+                        <button pButton type="button" label="إضافة طفل جديد" icon="pi pi-user-plus" iconPos="right"
+                            class="profile-add-button" (click)="addChild()"></button>
+                    </div>
+
+                    <div class="children-list">
+                        <article class="child-row" *ngFor="let child of childProfiles; trackBy: trackByChild">
+                            <button pButton type="button" icon="pi pi-pencil" class="child-edit-button"
+                                (click)="editChild(child)"></button>
+
+                            <div class="child-row__content">
+                                <div class="child-row__copy">
+                                    <h3>{{ child.name }}</h3>
+                                    <span>{{ child.details }}</span>
+                                </div>
+                                <p-avatar [image]="child.avatar" styleClass="child-avatar"></p-avatar>
+                            </div>
+                        </article>
+                    </div>
+
+                    <button pButton type="button" icon="pi pi-plus" label="تسجيل طفل جديد" iconPos="right"
+                        class="child-add-row" (click)="addChild()"></button>
+                </article>
+
+                <div class="support-layout">
+                    <article class="profile-card profile-card--support">
+                        <div class="profile-card__head">
+                            <div class="profile-card__title-wrap">
+                                <p-avatar icon="pi pi-headphones"
+                                    styleClass="section-icon section-icon--blue"></p-avatar>
+                                <div class="profile-card__title-copy">
+                                    <h2>الدعم والمساعدة</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="profile-card__description">هل تواجه مشكلة؟ فريق الدعم جاهز لمساعدتك في أي وقت.</p>
+
+                        <div class="support-list">
+                            <button pButton type="button" *ngFor="let item of supportItems" [label]="item.label"
+                                [icon]="item.icon" iconPos="right" class="support-action"
+                                (click)="openSupportItem()"></button>
+                        </div>
+                    </article>
+
+                    <article class="profile-card profile-card--logout">
+                        <div class="profile-card__head">
+                            <div class="profile-card__title-wrap">
+                                <p-avatar icon="pi pi-sign-out" styleClass="section-icon section-icon--red"></p-avatar>
+                                <div class="profile-card__title-copy">
+                                    <h2>تسجيل الخروج</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="profile-card__description">سيتم نقلك إلى شاشة تسجيل الدخول، ويمكنك العودة في أي وقت.</p>
+
+                        <button pButton type="button" label="تسجيل الخروج من الحساب" class="logout-button"
+                            (click)="logout()"></button>
                     </article>
                 </div>
 
-                <button pButton type="button" icon="pi pi-plus" label="تسجيل طفل جديد" iconPos="right" class="child-add-row" (click)="addChild()"></button>
-            </article>
-
-            <div *ngIf="activeSection === 'support'" class="support-layout">
-                <article class="profile-card profile-card--support">
+                <article class="profile-card profile-card--notifications">
                     <div class="profile-card__head">
                         <div class="profile-card__title-wrap">
-                            <p-avatar icon="pi pi-headphones" styleClass="section-icon section-icon--blue"></p-avatar>
+                            <p-avatar icon="pi pi-bell" styleClass="section-icon section-icon--amber"></p-avatar>
                             <div class="profile-card__title-copy">
-                                <h2>الدعم والمساعدة</h2>
-                                <p>هل تواجه مشكلة؟ فريق الدعم جاهز لمساعدتك في أي وقت.</p>
+                                <h2>الإشعارات</h2>
                             </div>
                         </div>
                     </div>
 
-                    <div class="support-list">
-                        <button
-                            pButton
-                            type="button"
-                            *ngFor="let item of supportItems"
-                            [label]="item.label"
-                            [icon]="item.icon"
-                            iconPos="right"
-                            class="support-action"
-                            (click)="openSupportItem(item)"
-                        ></button>
-                    </div>
-                </article>
+                    <div class="notification-list">
+                        <div class="notification-item"
+                            *ngFor="let item of notificationSettings; trackBy: trackByNotification">
+                            <button type="button" class="notification-switch"
+                                [class.notification-switch--on]="item.enabled" [attr.aria-pressed]="item.enabled"
+                                (click)="toggleNotification(item)">
+                                <span></span>
+                            </button>
 
-                <article class="profile-card profile-card--logout">
-                    <div class="profile-card__head">
-                        <div class="profile-card__title-wrap">
-                            <p-avatar icon="pi pi-sign-out" styleClass="section-icon section-icon--red"></p-avatar>
-                            <div class="profile-card__title-copy">
-                                <h2>تسجيل الخروج</h2>
-                                <p>سيتم نقلك إلى شاشة تسجيل الدخول، ويمكنك العودة في أي وقت.</p>
+                            <div class="notification-item__copy">
+                                <h3>{{ item.title }}</h3>
+                                <p>{{ item.description }}</p>
                             </div>
                         </div>
                     </div>
-
-                    <button pButton type="button" label="تسجيل الخروج من الحساب" class="logout-button" (click)="logout()"></button>
                 </article>
             </div>
-
-            <article *ngIf="activeSection === 'notifications'" class="profile-card profile-card--notifications">
-                <div class="profile-card__head">
-                    <div class="profile-card__title-wrap">
-                        <p-avatar icon="pi pi-bell" styleClass="section-icon section-icon--amber"></p-avatar>
-                        <div class="profile-card__title-copy">
-                            <h2>الإشعارات</h2>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="notification-list">
-                    <div class="notification-item" *ngFor="let item of notificationSettings; trackBy: trackByNotification">
-                        <button
-                            type="button"
-                            class="notification-switch"
-                            [class.notification-switch--on]="item.enabled"
-                            [attr.aria-pressed]="item.enabled"
-                            (click)="toggleNotification(item)"
-                        >
-                            <span></span>
-                        </button>
-
-                        <div class="notification-item__copy">
-                            <h3>{{ item.title }}</h3>
-                            <p>{{ item.description }}</p>
-                        </div>
-                    </div>
-                </div>
-            </article>
         </section>
     </main>
 </div>
+<p-dialog [(visible)]="showAddChildDialog" [modal]="true" [style]="{ width: '500px' }" header="إضافة طفل جديد">
+
+    <form [formGroup]="childForm">
+
+        <div class="profile-form__grid">
+
+            <div class="field">
+                <label>اسم الطفل</label>
+                <input pInputText formControlName="name" class="profile-input">
+            </div>
+
+            <div class="field">
+                <label>العمر</label>
+                <input pInputText type="number" formControlName="age" class="profile-input">
+            </div>
+
+        </div>
+
+        <div class="dialog-actions">
+
+            <button pButton type="button" label="إلغاء" severity="secondary" (click)="showAddChildDialog=false">
+            </button>
+
+            <button pButton type="button" label="حفظ" (click)="saveChild()">
+            </button>
+
+        </div>
+
+    </form>
+
+</p-dialog>

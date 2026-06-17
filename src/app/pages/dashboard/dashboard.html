@@ -4,33 +4,39 @@
         <div class="flex items-center justify-between w-full h-12 px-5 lg:px-8 relative" dir="rtl">
         
             <div class="flex items-center gap-4 shrink-0">
-                <button pButton pRipple icon="pi pi-users" class="text-2xl" [rounded]="true" navigateTo="/auth/login"
-                    (click)="menu?.toggle($event)"></button>
+                <div class="user-menu">
+                    <button pButton pRipple icon="pi pi-user" class="user-menu-btn" [rounded]="true" [text]="true"
+                        (click)="menu?.toggle($event)">
+                    </button>
+                
+                    <p-menu #menu [model]="items" [popup]="true" styleClass="user-dropdown">
+                    </p-menu>
+                </div>
                 <p-menu #menu [model]="items" [popup]="true" styleClass="rounded-xl shadow-lg"></p-menu>
             </div>
         
             <div class="absolute left-1/2 -translate-x-1/2">
                 <ul class="list-none p-0 m-0 flex items-center select-none gap-8">
                     <li>
-                        <a (click)="router.navigate(['/training'])" pRipple
+                        <a (click)="openTraining()" pRipple
                             class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
                             التدريبات
                         </a>
                     </li>
                     <li>
-                        <a (click)="router.navigate(['/history'])" pRipple
+                        <a (click)="navigateTo(['/history'])" pRipple
                             class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
                             النتائج
                         </a>
                     </li>
                     <li>
-                        <a (click)="router.navigate(['/questionnaire'])" pRipple
+                        <a (click)="openQuestionnaire()" pRipple
                             class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
                             التقييم
                         </a>
                     </li>
                     <li>
-                        <a (click)="router.navigate(['/learning-difficulties'])" pRipple
+                        <a (click)="navigateTo(['/learning-difficulties'])" pRipple
                             class="px-4 py-2 text-surface-900 dark:text-surface-0 font-medium text-xl hover:bg-[#ECFDF5] hover:text-[#10B981] rounded-full transition-all duration-200">
                             التعرف على صعوبات التعلم
                         </a>
