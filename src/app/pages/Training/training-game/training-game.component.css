@@ -384,3 +384,213 @@
     font-weight: 700;
     padding: 0.8rem 1.5rem;
 }
+.option-card:nth-child(1) {
+    background: #ffe4e6;
+}
+
+.option-card:nth-child(2) {
+    background: #dbeafe;
+}
+
+.option-card:nth-child(3) {
+    background: #fef9c3;
+}
+
+.option-card:nth-child(4) {
+    background: #dcfce7;
+}
+
+.option-card.selected {
+    transform: scale(1.2);
+}
+.game-footer {
+    margin-top: 2rem;
+}
+.question-card {
+    min-height: 420px;
+}
+.timer-box {
+    min-width: 120px;
+
+    height: 56px;
+
+    padding: 0 1rem;
+
+    border-radius: 40px;
+
+    background: #fff;
+
+    border: 4px solid #5ec5ff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+
+    font-size: 1.2rem;
+    font-weight: 800;
+
+    color: #374151;
+
+    box-shadow: 0 6px 0 #dbeafe;
+}
+
+.timer-box i {
+    font-size: 1.2rem;
+}
+
+.timer-box--danger {
+    border-color: #ef4444;
+    color: #dc2626;
+    animation: pulse 1s infinite;
+}
+.stars-counter {
+
+    min-width: 120px;
+
+    height: 56px;
+
+    background: #fff;
+
+    border: 4px solid #fbbf24;
+
+    border-radius: 999px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: .5rem;
+
+    font-size: 1.4rem;
+    font-weight: 800;
+
+    color: #92400e;
+
+    box-shadow: 0 6px 0 #fde68a;
+}
+
+.stars-counter i {
+
+    color: #fbbf24;
+
+    font-size: 1.3rem;
+}
+
+.progress-wrapper {
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+}
+.stars-box {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+
+    background: #fef3c7;
+
+    border: 2px solid #fbbf24;
+
+    padding: .75rem 1rem;
+
+    border-radius: 999px;
+
+    font-weight: 700;
+}
+
+.stars-box i {
+    color: #eab308;
+}
+
+.star-reward {
+    position: fixed;
+
+    top: 120px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    background: #22c55e;
+    color: white;
+
+    padding: 1rem 2rem;
+
+    border-radius: 999px;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    z-index: 9999;
+
+    animation: rewardPop 1s ease forwards;
+}
+.math-visual {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    margin: 1rem 0 1.5rem;
+
+    font-size: 2.5rem;
+}
+
+.math-item {
+
+    background: #f8fafc;
+
+    border-radius: 16px;
+
+    padding: .5rem .8rem;
+}
+.option-emoji {
+
+    font-size: 3.5rem;
+
+    margin-bottom: 1rem;
+}
+.option-emoji {
+    font-size: 2rem;
+    margin-bottom: .5rem;
+}
+.game-character {
+    display: flex;
+    align-items: row-reverse;
+        align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.character-bubble {
+    flex: 1;
+    background: #ecfdf5;
+    border: 2px solid #bbf7d0;
+    border-radius: 24px;
+    padding: 2rem;
+}
+.helper-text {
+    display: block;
+    color: #16a34a;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.character-avatar {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 4rem;
+
+    border-radius: 50%;
+    background: #fcd34d;
+    border: 6px solid #f59e0b;
+}

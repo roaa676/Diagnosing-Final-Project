@@ -68,7 +68,6 @@ interface AssessmentDiagnosisSummary {
     styleUrls: ['./assessment.component.css']
 })
 export class AssessmentComponent implements OnInit, OnDestroy {
-    // -------- UI-only additions to match training-game template (logic unchanged) --------
     stars = 0;
     showStarReward = false;
     helperMessages = [
@@ -78,12 +77,9 @@ export class AssessmentComponent implements OnInit, OnDestroy {
         'أحسنت! أكمل التحدي 🚀',
         'لنرَ إن كنت تستطيع حلها 😎'
     ];
-    // helperMessage will be provided via UI getter below
-    // helperMessage = '';
 
     readonly circleCircumference = 2 * Math.PI * 52;
 
-    // mapping names expected by assessment.component.html
     get formattedTime(): string { return this.formatTime(this.timeRemaining); }
     get progressPercent(): number { return this.getProgress(); }
     getCircleOffset(percent: number): number { return this.circleCircumference * (1 - percent / 100); }
@@ -94,25 +90,13 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     goBack(): void { this.navigateToQuestionnaire(); }
     next(): void { this.nextQuestion(); }
 
-    // used by template
     get diagnosisLabelUI(): string { return this.diagnosisLabel; }
 
     get helperMessage(): string {
         return this.getResultMessage();
     }
-
-
-
-
-
-
-
-    // ---------------------------------------------------------------------------------------
-
     questions: Question[] = [];
     state: AssessmentState = {
-
-
         currentQuestionIndex: 0,
         answers: {},
         score: 0,
@@ -467,6 +451,17 @@ export class AssessmentComponent implements OnInit, OnDestroy {
             }
         });
     }
+    private rewardStars(points: number = 10): void {
+
+        this.stars += points;
+
+        this.showStarReward = true;
+
+        setTimeout(() => {
+            this.showStarReward = false;
+        }, 1000);
+
+    }
 
     private normalizeQuestion(rawQuestion: AssessmentQuestion, questionIndex: number): Question {
         const options = (rawQuestion.options ?? []).map((option, optionIndex) => this.normalizeOption(option, optionIndex));
@@ -592,6 +587,12 @@ export class AssessmentComponent implements OnInit, OnDestroy {
 
         const selectedAnswer = this.getCurrentSelectedAnswer();
         const isCorrect = selectedAnswer !== null && this.isAnswerCorrect(selectedAnswer, this.currentQuestion);
+        if (
+            isCorrect &&
+            !this.state.answers[this.currentQuestion.id]
+        ) {
+            this.rewardStars(10);
+        }
         const points = isCorrect ? this.currentQuestion.points : 0;
 
         this.state.answers[this.currentQuestion.id] = {
@@ -604,8 +605,6 @@ export class AssessmentComponent implements OnInit, OnDestroy {
 
         this.recalculateScore();
         this.totalScore = this.state.score;
-
-        console.log(`[Assessment] Question ${this.currentQuestion.id} Answered. Correct: ${isCorrect}, Points: ${points}. Total Score now: ${this.totalScore}`);
     }
 
     private getCurrentSelectedAnswer(): SelectedAnswer {
