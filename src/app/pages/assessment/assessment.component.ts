@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AssessmentOption, AssessmentQuestion, AssessmentService } from '@/core/services/assessment.service';
+import { getMathRepresentation } from '@/core/shared/constants/math-visual';
+import { EMOJI_MAP } from '@/core/shared/constants/emoji-map';
 
 type OptionId = number | string;
 type SelectedAnswer = OptionId | OptionId[] | null;
@@ -66,8 +68,51 @@ interface AssessmentDiagnosisSummary {
     styleUrls: ['./assessment.component.css']
 })
 export class AssessmentComponent implements OnInit, OnDestroy {
+    // -------- UI-only additions to match training-game template (logic unchanged) --------
+    stars = 0;
+    showStarReward = false;
+    helperMessages = [
+        'هيا نلعب معاً 🎮',
+        'أنت ذكي جداً 🌟',
+        'اختر الإجابة الصحيحة 🧠',
+        'أحسنت! أكمل التحدي 🚀',
+        'لنرَ إن كنت تستطيع حلها 😎'
+    ];
+    // helperMessage will be provided via UI getter below
+    // helperMessage = '';
+
+    readonly circleCircumference = 2 * Math.PI * 52;
+
+    // mapping names expected by assessment.component.html
+    get formattedTime(): string { return this.formatTime(this.timeRemaining); }
+    get progressPercent(): number { return this.getProgress(); }
+    getCircleOffset(percent: number): number { return this.circleCircumference * (1 - percent / 100); }
+
+    get isLastQuestionUI(): boolean { return this.state.currentQuestionIndex === this.questions.length - 1; }
+
+
+    goBack(): void { this.navigateToQuestionnaire(); }
+    next(): void { this.nextQuestion(); }
+
+    // used by template
+    get diagnosisLabelUI(): string { return this.diagnosisLabel; }
+
+    get helperMessage(): string {
+        return this.getResultMessage();
+    }
+
+
+
+
+
+
+
+    // ---------------------------------------------------------------------------------------
+
     questions: Question[] = [];
     state: AssessmentState = {
+
+
         currentQuestionIndex: 0,
         answers: {},
         score: 0,
@@ -99,8 +144,7 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     totalTime = 0;
     playingAudio = false;
     reviewMode = false;
-
-    private readonly defaultQuestionTime = 30;
+    getMathRepresentation = getMathRepresentation;    private readonly defaultQuestionTime = 30;
     private readonly defaultQuestionPoints = 10;
     private destroy$ = new Subject<void>();
     private timerInterval: ReturnType<typeof setInterval> | null = null;
@@ -114,6 +158,55 @@ export class AssessmentComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadLastAssessmentIfExists();
+    }
+
+    loadAssessment(): void {
+        console.log('[Assessment] loadAssessment() called');
+        const difficultyId = this.getNumericQueryParam('difficultyId') ?? this.getStoredDifficultyId();
+        const childId = this.getNumericQueryParam('childId') ?? this.getStoredChildId();
+        if (!difficultyId || !childId) {
+            this.errorMessage = 'معرّفات الطفل أو مستوى الصعوبة غير صحيحة';
+            this.loading = false;
+            return;
+        }
+        this.difficultyId = difficultyId;
+        this.childId = childId;
+        console.log('Loading assessment for Child:', this.childId, 'Difficulty:', this.difficultyId);
+        this.storeCurrentSelection();
+
+        this.assessmentService
+            .getAssessmentContent(this.difficultyId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    console.log('FULL RESPONSE', response);
+                    const content = response.data;
+                    const selectedLevel = Array.isArray(content) ? content[0] : (content as any);
+                    this.currentLevel = selectedLevel?.difficulty_level ?? 0;
+                    console.log('assessment response.data =', content);
+                    console.log('selectedLevel =', selectedLevel);
+                    console.log('first question =', selectedLevel?.questions?.[0]);
+
+                    this.questions = (selectedLevel?.questions ?? []).map((question: any, index: number) => this.normalizeQuestion(question, index));
+                    this.difficultyName = selectedLevel?.level_name || 'التقييم المبدئي';
+                    this.totalTime = this.questions.reduce((sum, question) => sum + question.time_limit, 0);
+                    this.maxScore = this.questions.reduce((sum, question) => sum + question.points, 0);
+
+
+                    if (!this.questions.length) {
+                        this.errorMessage = 'لا توجد أسئلة متاحة لهذا التقييم حالياً';
+                        this.loading = false;
+                        return;
+                    }
+
+                    this.loading = false;
+                    this.setCurrentQuestion(0);
+                },
+                error: (error) => {
+                    this.errorMessage = error?.error?.message || 'فشل تحميل أسئلة التقييم';
+                    this.loading = false;
+                }
+            });
     }
 
     private loadLastAssessmentIfExists(): void {
@@ -165,60 +258,23 @@ export class AssessmentComponent implements OnInit, OnDestroy {
             });
     }
 
+    getOptionEmoji(text: string): string {
+
+        return EMOJI_MAP[text] || '✨';
+
+    }
+
+    isLetterOption(text: string): boolean {
+
+        return text.length === 1;
+
+    }
+
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
         this.stopTimer();
         this.stopAudio();
-    }
-
-    loadAssessment(): void {
-        console.log('[Assessment] loadAssessment() called');
-        const difficultyId = this.getNumericQueryParam('difficultyId') ?? this.getStoredDifficultyId();
-        const childId = this.getNumericQueryParam('childId') ?? this.getStoredChildId();
-        if (!difficultyId || !childId) {
-            this.errorMessage = 'معرّفات الطفل أو مستوى الصعوبة غير صحيحة';
-            this.loading = false;
-            return;
-        }
-        this.difficultyId = difficultyId;
-        this.childId = childId;
-        console.log('Loading assessment for Child:', this.childId, 'Difficulty:', this.difficultyId);
-        this.storeCurrentSelection();
-
-        this.assessmentService
-            .getAssessmentContent(this.difficultyId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (response) => {
-                    console.log('FULL RESPONSE', response);
-                    const content = response.data;
-                    const selectedLevel = Array.isArray(content) ? content[0] : (content as any);
-                    this.currentLevel = selectedLevel?.difficulty_level ?? 0;
-                    console.log('assessment response.data =', content);
-                    console.log('selectedLevel =', selectedLevel);
-                    console.log('first question =', selectedLevel?.questions?.[0]);
-
-                    this.questions = (selectedLevel?.questions ?? []).map((question: any, index: number) => this.normalizeQuestion(question, index));
-                    this.difficultyName = selectedLevel?.level_name || 'التقييم المبدئي';
-                    this.totalTime = this.questions.reduce((sum, question) => sum + question.time_limit, 0);
-                    this.maxScore = this.questions.reduce((sum, question) => sum + question.points, 0);
-
-
-                    if (!this.questions.length) {
-                        this.errorMessage = 'لا توجد أسئلة متاحة لهذا التقييم حالياً';
-                        this.loading = false;
-                        return;
-                    }
-
-                    this.loading = false;
-                    this.setCurrentQuestion(0);
-                },
-                error: (error) => {
-                    this.errorMessage = error?.error?.message || 'فشل تحميل أسئلة التقييم';
-                    this.loading = false;
-                }
-            });
     }
 
     selectOption(optionId: OptionId): void {

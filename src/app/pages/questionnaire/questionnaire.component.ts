@@ -222,7 +222,13 @@ export class QuestionnaireComponent implements OnInit, OnDestroy {
     });
   }
 
+  navigateToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+
   private getStoredDifficultyId(): number {
+
     const rawValue =
       this.route.snapshot.queryParamMap.get('difficultyId') ??
       localStorage.getItem('selected_difficulty_id') ??

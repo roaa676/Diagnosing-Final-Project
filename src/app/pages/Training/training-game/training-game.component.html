@@ -5,21 +5,36 @@
     </button>
 
     <div *ngIf="!showResult" class="game-header">
+
+        <div class="stars-counter">
+
+            <i class="pi pi-star-fill"></i>
+
+            <span>{{ stars }}</span>
+
+        </div>
+
+        <div class="progress-wrapper">
+
+            <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="progressPercent">
+                </div>
+            </div>
+
+            <span class="progress-text">
+                السؤال {{ currentQuestionIndex + 1 }}
+                من
+                {{ questions.length }}
+            </span>
+
+        </div>
+
         <div class="timer-box" [class.timer-box--danger]="remainingSeconds <= 300">
 
             <i class="pi pi-clock"></i>
 
             <span>{{ formattedTime }}</span>
 
-        </div>
-        <div class="progress-wrapper">
-            <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="progressPercent"></div>
-            </div>
-
-            <span class="progress-text">
-                السؤال {{ currentQuestionIndex + 1 }} من {{ questions.length }}
-            </span>
         </div>
 
     </div>
@@ -125,7 +140,34 @@
 
     <div *ngIf="!loading && !errorMessage && !showResult && currentQuestion" class="question-card">
         <div class="question-content">
-            <h2 class="question-text">{{ currentQuestion.question }}</h2>
+            <div class="game-character">
+
+                <div class="character-avatar">
+                    🦉
+                </div>
+
+                <div class="character-bubble">
+
+                    <span class="helper-text">
+                        {{ helperMessage }}
+                    </span>
+                    <div *ngIf="difficultyId === 2" class="math-visual">
+                    
+                        <span *ngFor="let item of getMathRepresentation(currentQuestion.question)">
+                    
+                            {{ item }}
+                    
+                        </span>
+                    
+                    </div>
+
+                    <h2 class="question-text">
+                        {{ currentQuestion.question }}
+                    </h2>
+
+                </div>
+
+            </div>
 
             <div *ngIf="currentQuestion.audio_url" class="audio-player">
                 <button (click)="playAudio(currentQuestion.audio_url)" class="audio-btn" [class.playing]="playingAudio">
@@ -140,11 +182,13 @@
         </div>
 
         <div class="options-grid" [class.visual-grid]="isVisualQuestion(currentQuestion)">
-            <div *ngFor="let option of currentQuestion.options" class="option-card"
-                [class.selected]="isSelected(option.id)" (click)="selectOption(option.id)">
+            <div *ngFor="let option of currentQuestion.options; let i = index" class="option-card"
+                [class.selected]="isSelected(option.id)" [class.option-card--1]="i === 0"
+                [class.option-card--2]="i === 1" [class.option-card--3]="i === 2" [class.option-card--4]="i === 3"
+                (click)="selectOption(option.id)">
 
-                <div *ngIf="option.image" class="option-image">
-                    <img [src]="option.image" alt="خيار">
+                <div class="option-emoji" *ngIf="!isLetterOption(option.text)">
+                    {{ getOptionEmoji(option.text) }}
                 </div>
                 <span class="option-text">{{ option.text }}</span>
 
@@ -186,4 +230,9 @@
         </div>
 
     </p-dialog>
+    <div *ngIf="showStarReward" class="star-reward">
+
+        ⭐ +10
+
+    </div>
 </div>

@@ -8,6 +8,8 @@ import { DialogModule } from "primeng/dialog";
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { RippleModule } from 'primeng/ripple';
+import { EMOJI_MAP } from '@/core/shared/constants/emoji-map';
+import { getMathRepresentation } from '@/core/shared/constants/math-visual';
 
 type OptionId = number | string;
 
@@ -50,7 +52,7 @@ interface TrainingLevelResponse {
 export class TrainingGameComponent implements OnInit, OnDestroy {
     playingAudio = false;
     private currentAudio: HTMLAudioElement | null = null;
-
+    readonly getMathRepresentation = getMathRepresentation;
     private destroy$ = new Subject<void>();
     readonly circleCircumference = 2 * Math.PI * 52;
 
@@ -75,6 +77,18 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
     remainingSeconds = 30 * 60;
     private timerInterval: any;
     timeExpired = false;
+    stars = 0;
+    showStarReward = false;
+    helperMessages = [
+        'هيا نلعب معاً 🎮',
+        'أنت ذكي جداً 🌟',
+        'اختر الإجابة الصحيحة 🧠',
+        'أحسنت! أكمل التحدي 🚀',
+        'لنرَ إن كنت تستطيع حلها 😎'
+    ];
+
+
+    helperMessage = '';
 
     constructor(
         private readonly route: ActivatedRoute,
@@ -202,6 +216,13 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
 
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
+
+    getOptionEmoji(text: string): string {
+
+        return EMOJI_MAP[text] || '✨';
+
+    }
+
     goBack(): void {
         this.router.navigate(['/training/levels'], {
             queryParams: { childId: this.childId, difficultyId: this.difficultyId }
@@ -218,6 +239,9 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
             default:
                 return `المستوى ${this.level}`;
         }
+    }
+    isLetterOption(text: string): boolean {
+        return text.length === 1;
     }
 
     get difficultyName(): string {
@@ -298,7 +322,7 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
                 next: (res: TrainingLevelResponse) => {
                     const rawQuestions = (res?.data?.questions ?? res?.questions ?? []) as any[];
                     this.questions = this.transformQuestions(rawQuestions);
-
+                    this.updateHelperMessage();
                     if (!this.questions.length) {
                         this.errorMessage = 'لا توجد أسئلة متاحة لهذا المستوى حالياً';
                         this.loading = false;
@@ -315,6 +339,15 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
                     this.loading = false;
                 }
             });
+    }
+
+    private updateHelperMessage(): void {
+
+        this.helperMessage =
+            this.helperMessages[
+            Math.floor(Math.random() * this.helperMessages.length)
+            ];
+
     }
 
     private transformQuestions(rawQuestions: any[]): TrainingQuestion[] {
@@ -439,6 +472,7 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
         }
 
         this.currentQuestionIndex += 1;
+        this.updateHelperMessage();
         this.selectedOption = this.getSavedSelection(this.currentQuestion);
     }
 
@@ -448,10 +482,6 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
         const finalScore = this.calculateTotalScore();
 
         const correctCount = Object.values(this.answers).filter((a) => a.isCorrect).length;
-
-        console.log('QUESTIONS = ', this.questions);
-
-        console.log('ANSWERS = ', this.answers);
 
         console.log(
             'CORRECT COUNT = ',
@@ -512,17 +542,38 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
     }
 
     private saveCurrentAnswer(): void {
+
         if (!this.currentQuestion) {
             return;
         }
 
         const selectedAnswer = this.getCurrentSelectedAnswer();
-        const isCorrect = selectedAnswer !== null && this.isTrainingAnswerCorrect(selectedAnswer, this.currentQuestion);
-        console.log('QUESTION = ', this.currentQuestion.question);
-        console.log('SELECTED = ', selectedAnswer);
-        console.log('CORRECT ANSWER = ', this.currentQuestion.correct_answer);
-        console.log('IS CORRECT = ', isCorrect);
-        const points = isCorrect ? this.getQuestionPoints(this.currentQuestion) : 0;
+
+        const isCorrect =
+            selectedAnswer !== null &&
+            this.isTrainingAnswerCorrect(
+                selectedAnswer,
+                this.currentQuestion
+            );
+
+        const points = isCorrect
+            ? this.getQuestionPoints(this.currentQuestion)
+            : 0;
+
+
+        const alreadyAnswered =
+            this.answers[this.currentQuestion.id];
+
+        if (isCorrect && !alreadyAnswered) {
+
+            this.stars += 10;
+
+            this.showStarReward = true;
+
+            setTimeout(() => {
+                this.showStarReward = false;
+            }, 1000);
+        }
 
         this.answers[this.currentQuestion.id] = {
             selected: selectedAnswer,

@@ -1,170 +1,191 @@
-<div class="assessment-container" dir="rtl">
+<div class="game-container">
+    <button *ngIf="!submitted" (click)="goBack()" class="back-link">
+        رجوع
+        <i class="pi pi-arrow-left"></i>
+    </button>
+
+    <div *ngIf="!submitted" class="game-header">
+
+        <div class="stars-counter">
+
+            <i class="pi pi-star-fill"></i>
+
+            <span>{{ stars }}</span>
+
+        </div>
+
+        <div class="progress-wrapper">
+
+            <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="progressPercent">
+                </div>
+            </div>
+
+            <span class="progress-text">
+                السؤال {{ state.currentQuestionIndex + 1 }}
+                من
+                {{ questions.length }}
+            </span>
+
+        </div>
+
+        <div class="timer-box" [class.timer-box--danger]="timeRemaining <= 300">
+
+            <i class="pi pi-clock"></i>
+
+            <span>{{ formattedTime }}</span>
+
+        </div>
+
+    </div>
+
     <div *ngIf="loading" class="loading-state">
         <div class="spinner"></div>
-        <p>جاري تحميل أسئلة التقييم...</p>
+        <p>جاري تحضير التقييم يا بطل...</p>
     </div>
 
-    <div *ngIf="errorMessage && !loading" class="error-state">
-        <div class="error-box">
-            <span class="error-icon">⚠️</span>
-            <p>{{ errorMessage }}</p>
-            <button type="button" class="btn-back" (click)="navigateToQuestionnaire()">رجوع للاستبيان</button>
-        </div>
+    <div *ngIf="errorMessage" class="error-state">
+        <i class="pi pi-exclamation-circle"></i>
+        <p>{{ errorMessage }}</p>
+        <button (click)="goBack()" class="btn-primary">العودة للمستويات</button>
     </div>
 
-    <div *ngIf="!loading && !errorMessage && !submitted" class="assessment-content">
-        <header class="header-bar">
-            <div class="header-left">
-                <button type="button" class="btn-info" title="معلومات">🧠</button>
-            </div>
+    <div *ngIf="!loading && !errorMessage && !submitted && currentQuestion" class="question-card">
+        <div class="question-content">
+            <div class="game-character">
 
-            <div class="header-center">
-                <div class="greeting">{{ greetingMessage }}</div>
-                <div class="difficulty-name">{{ difficultyName }}</div>
-            </div>
-
-            <div class="header-right">
-                <div class="time-display" [class.time-warning]="timeRemaining <= 10">
-                    <span class="time-icon">⏱️</span>
-                    <span class="time-value">{{ formatTime(timeRemaining) }}</span>
-                </div>
-                <div class="score-display">
-                    <span class="score-value">{{ state.score }}</span>
-                    <span class="score-icon">⭐</span>
-                </div>
-            </div>
-        </header>
-
-        <section class="progress-section">
-            <div class="progress-info">
-                <span class="progress-label">سؤال {{ state.currentQuestionIndex + 1 }} / {{ questions.length }}</span>
-                <div class="progress-bar-wrapper">
-                    <div class="progress-bar" [style.width.%]="getProgress()"></div>
-                </div>
-            </div>
-        </section>
-
-        <section *ngIf="currentQuestion as question" class="question-container">
-            <div class="question-category">
-                {{ question.category || 'تقييم الطفل' }}
-            </div>
-
-            <h1 class="question-text">
-                {{ question.question }}
-            </h1>
-
-            <div *ngIf="question.type === 'audio' && question.audio_url" class="audio-section">
-                <button type="button" class="btn-audio" (click)="playAudio(question.audio_url)" [disabled]="playingAudio">
-                    <span class="audio-icon" *ngIf="!playingAudio">🔊</span>
-                    <span class="audio-icon" *ngIf="playingAudio">⏸️</span>
-                    <span *ngIf="!playingAudio">استمع للسؤال</span>
-                    <span *ngIf="playingAudio">جاري التشغيل...</span>
-                </button>
-            </div>
-
-            <div *ngIf="question.image_url" class="image-section">
-                <div class="question-image-box">
-                    <img [src]="question.image_url" alt="صورة السؤال" class="question-image" />
-                </div>
-            </div>
-
-            <div class="options-section">
-                <div *ngIf="isVisualQuestion(question)" class="visual-options">
-                    <button type="button" *ngFor="let option of question.options" class="visual-option-item" [class.selected]="isSelected(option.id)" (click)="selectOption(option.id)" [disabled]="reviewMode">
-                        <div class="visual-option-content">
-                            <img *ngIf="option.image" [src]="option.image" [alt]="option.text" class="option-image" />
-                            <span *ngIf="!option.image" class="option-shape">{{ option.text }}</span>
-                        </div>
-                        <span class="option-check" aria-hidden="true">✓</span>
-                    </button>
+                <div class="character-avatar">
+                    🦉
                 </div>
 
-                <div *ngIf="isChoiceQuestion(question)" class="text-options">
-                    <button type="button" *ngFor="let option of question.options" class="text-option-item" [class.selected]="isSelected(option.id)" (click)="selectOption(option.id)">
-                        <span class="option-radio" aria-hidden="true"></span>
-                        <span class="option-label">{{ option.text }}</span>
-                    </button>
-                </div>
+                <div class="character-bubble">
 
-                <div *ngIf="isOrderingQuestion(question)" class="ordering-options">
-                    <div class="ordering-instruction">رتّب العناصر بالترتيب الصحيح:</div>
+                    <span class="helper-text">
+                        {{ helperMessage }}
+                    </span>
 
-                    <div *ngFor="let option of orderedOptions; let i = index" class="ordering-item">
-                        <span class="ordering-number">{{ i + 1 }}</span>
-                        <span class="ordering-text">{{ option.text }}</span>
-                        <div class="ordering-actions">
-                            <button type="button" class="ordering-btn" title="تحريك لأعلى" (click)="moveOrderingOption(i, -1)" [disabled]="!canMoveOrderingOption(i, -1)">↑</button>
-                            <button type="button" class="ordering-btn" title="تحريك لأسفل" (click)="moveOrderingOption(i, 1)" [disabled]="!canMoveOrderingOption(i, 1)">↓</button>
-                        </div>
+                    <div *ngIf="difficultyId === 2" class="math-visual">
+
+                        <span *ngFor="let item of getMathRepresentation(currentQuestion.question)">
+                            {{ item }}
+                        </span>
+
                     </div>
+
+                    <h2 class="question-text">
+                        {{ currentQuestion.question }}
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div *ngIf="currentQuestion.audio_url" class="audio-player">
+                <button (click)="playAudio(currentQuestion.audio_url!)" class="audio-btn" [class.playing]="playingAudio">
+                    <i [class]="playingAudio ? 'pi pi-volume-up' : 'pi pi-volume-down'"></i>
+                    استمع للسؤال
+                </button>
+            </div>
+
+            <div *ngIf="currentQuestion.image_url" class="question-image">
+                <img [src]="currentQuestion.image_url" alt="صورة السؤال">
+            </div>
+        </div>
+
+        <div class="options-grid" [class.visual-grid]="isVisualQuestion(currentQuestion)">
+            <div *ngFor="let option of currentQuestion.options; let i = index" class="option-card"
+                [class.selected]="isSelected(option.id)" [class.option-card--1]="i === 0"
+                [class.option-card--2]="i === 1" [class.option-card--3]="i === 2" [class.option-card--4]="i === 3"
+                (click)="selectOption(option.id)">
+
+                <div class="option-emoji" *ngIf="!isLetterOption(option.text)">
+                    {{ getOptionEmoji(option.text) }}
+                </div>
+                <span class="option-text">{{ option.text }}</span>
+
+                <div class="selection-indicator">
+                    <i class="pi pi-check" *ngIf="isSelected(option.id)"></i>
                 </div>
             </div>
+        </div>
 
-            <div *ngIf="question.explanation" class="hint-box">
-                <span class="hint-icon">💡</span>
-                <span class="hint-text">{{ question.explanation }}</span>
-            </div>
-
-            <div class="navigation-buttons">
-                <button type="button" class="btn btn-secondary"  (click)="previousQuestion()" [disabled]="!canGoPrevious()">
-                    <span class="btn-arrow">→</span>
-                    <span>السؤال السابق</span>
-                </button>
-
-                <button type="button" class="btn btn-primary"  (click)="nextQuestion()">
-                    <span>{{ getNextButtonText() }}</span>
-                    <span class="btn-arrow">←</span>
-                </button>
-            </div>
-        </section>
+        <div class="game-footer">
+            <button class="next-btn" [disabled]="selectedOption === null" (click)="next()">
+{{ isLastQuestionUI ? 'إنهاء التقييم' : 'السؤال التالي' }}
+                <i class="pi pi-arrow-left"></i>
+            </button>
+        </div>
     </div>
 
-    <div *ngIf="submitted" class="results-screen">
+    <div *ngIf="submitted" class="result-card">
 
-        <div class="results-content">
-            <div class="result-icon">🎉</div>
-            <h2>انتهى التقييم!</h2>
+        <div class="summary-header">
+            <h1>ملخص أداء الطفل</h1>
+            <h4>نظرة سريعة على نتيجة التقييم</h4>
+        </div>
 
-            <div class="result-stats">
-                <div class="stat-item">
-                    <span class="stat-label">النتيجة النهائية</span>
-                    <span class="stat-value">{{ totalScore }} / {{ maxScore }}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">النسبة المئوية</span>
-                    <span class="stat-value">{{ scorePercentage }}%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">الإجابات الصحيحة</span>
-                    <span class="stat-value">{{ correctAnswersCount }} / {{ questions.length }}</span>
-                </div>
+        <div class="performance-card">
+
+            <div class="score-circle">
+
+                <svg viewBox="0 0 120 120">
+                    <circle class="circle-bg" cx="60" cy="60" r="52"></circle>
+                    <circle class="circle-progress" cx="60" cy="60" r="52" [style.stroke-dashoffset]="getCircleOffset(scorePercentage)"></circle>
+                </svg>
+
+                <span>{{ scorePercentage }}%</span>
+
             </div>
 
-            <div class="result-message">
-                <p>{{ getResultMessage() }}</p>
-            </div>
+            <div class="performance-content">
 
-            <div *ngIf="submittingResult" class="save-state">جاري حفظ النتيجة...</div>
+                <div class="performance-title">
 
-            <div *ngIf="resultSaved && !submittingResult" class="save-state save-state--success">تم حفظ النتيجة بنجاح</div>
+<h3>{{ diagnosisLabelUI }}</h3>
 
-            <div *ngIf="resultErrorMessage && !submittingResult" class="save-state save-state--error">
-                <span>{{ resultErrorMessage }}</span>
-                <button type="button" class="retry-btn" (click)="retrySubmitResult()">إعادة المحاولة</button>
-            </div>
+                    <span>
+                        {{ helperMessage }}
+                    </span>
 
-            <div class="results-actions">
-                <button type="button" class="btn-next" (click)="navigateToTraining()">
-                    <span>الانتقال للتدريب</span>
-                    <span class="icon">🎮</span>
-                </button>
+                </div>
 
-                <button type="button" class="btn btn-secondary" (click)="onShowQuestions()">
-                    <span>عرض الأسئلة</span>
-                </button>
+                <div class="progress-track">
+
+                    <div class="progress-value" [style.width.%]="scorePercentage"></div>
+
+                </div>
+
+                <div class="performance-stats">
+
+                    <span>
+                        {{ correctAnswersCount }} /
+                        {{ questions.length }}
+                        إجابة صحيحة
+                    </span>
+
+                </div>
 
             </div>
 
         </div>
+
+        <div class="result-actions">
+
+            <a class="next-level-link" (click)="navigateToTraining()">
+
+                الانتقال إلى التدريب
+                <i class="pi pi-arrow-left"></i>
+
+            </a>
+
+            <a class="levels-link" (click)="onShowQuestions()">
+
+                عرض الأسئلة
+
+            </a>
+
+        </div>
+
     </div>
 </div>
+
