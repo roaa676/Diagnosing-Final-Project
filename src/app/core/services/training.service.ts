@@ -38,8 +38,17 @@ export class TrainingService {
   constructor(private http: HttpClient) { }
 
 
-  getTrainingRoadmap(childId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/training/roadmap/${childId}`);
+  // getTrainingRoadmap(childId: number): Observable<any> {
+  //   return this.http.get<any>(`${this.apiUrl}/training/roadmap/${childId}`);
+  // }
+  getTrainingRoadmap(
+    childId: number,
+    difficultyId: number
+  ): Observable<any> {
+
+    return this.http.get(
+      `${this.apiUrl}/training/roadmap/${childId}?difficulty_id=${difficultyId}`
+    );
   }
 
 

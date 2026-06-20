@@ -3,19 +3,25 @@
         رجوع
         <i class="pi pi-arrow-left"></i>
     </button>
-    
+
     <div *ngIf="!showResult" class="game-header">
-    
+        <div class="timer-box" [class.timer-box--danger]="remainingSeconds <= 300">
+
+            <i class="pi pi-clock"></i>
+
+            <span>{{ formattedTime }}</span>
+
+        </div>
         <div class="progress-wrapper">
             <div class="progress-bar">
                 <div class="progress-fill" [style.width.%]="progressPercent"></div>
             </div>
-    
+
             <span class="progress-text">
                 السؤال {{ currentQuestionIndex + 1 }} من {{ questions.length }}
             </span>
         </div>
-    
+
     </div>
 
     <div *ngIf="loading" class="loading-state">
@@ -39,20 +45,20 @@
         <div class="performance-card" *ngFor="let result of trainingResults">
 
             <div class="score-circle">
-            
+
                 <svg viewBox="0 0 120 120">
-            
+
                     <circle class="circle-bg" cx="60" cy="60" r="52">
                     </circle>
-            
+
                     <circle class="circle-progress" cx="60" cy="60" r="52"
                         [style.stroke-dashoffset]="getCircleOffset(result.score)">
                     </circle>
-            
+
                 </svg>
-            
+
                 <span>{{ result.score }}%</span>
-            
+
             </div>
 
             <div class="performance-content">
@@ -155,4 +161,29 @@
             </button>
         </div>
     </div>
+    <p-dialog [(visible)]="showLockedDialog" [modal]="true" [closable]="true" [draggable]="false" [resizable]="false"
+        [style]="{ width: '500px' }" [dismissableMask]="true">
+
+        <div class="lock-dialog">
+
+            <div class="lock-dialog__icon">
+                <i class="pi pi-clock"></i>
+            </div>
+
+            <h3>⏰ المستوى سيفتح قريباً</h3>
+
+            <p>
+                {{ lockedMessage }}
+            </p>
+
+            <div class="lock-dialog__badge">
+                🌟 استرح قليلاً وعد غداً لإكمال المغامرة
+            </div>
+
+            <button pButton type="button" label="حسناً" class="lock-dialog__button" (click)="showLockedDialog = false">
+            </button>
+
+        </div>
+
+    </p-dialog>
 </div>

@@ -4,6 +4,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { TrainingService } from '@/core/services/training.service';
 import { LearningDifficultyService } from '@/core/services/learning-difficulty.service';
+import { DialogModule } from "primeng/dialog";
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { RippleModule } from 'primeng/ripple';
 
 type OptionId = number | string;
 
@@ -39,7 +43,7 @@ interface TrainingLevelResponse {
 @Component({
     selector: 'app-training-game',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, DialogModule, ButtonModule, ProgressBarModule, RippleModule],
     templateUrl: './training-game.component.html',
     styleUrls: ['./training-game.component.css']
 })
@@ -66,6 +70,11 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
     level!: number;
     childId!: number;
     testType: string = '';
+    showLockedDialog = false;
+    lockedMessage = '';
+    remainingSeconds = 30 * 60;
+    private timerInterval: any;
+    timeExpired = false;
 
     constructor(
         private readonly route: ActivatedRoute,
@@ -103,6 +112,7 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
                 this.childId = childId;
 
                 this.loadDifficultyAndQuestions();
+                this.startTimer();
             });
     }
     private resetTrainingState(): void {
@@ -158,13 +168,40 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
                 }
             });
     }
+    private startTimer(): void {
+
+        clearInterval(this.timerInterval);
+
+        this.timerInterval = setInterval(() => {
+
+            this.remainingSeconds--;
+
+            if (this.remainingSeconds <= 0) {
+
+                clearInterval(this.timerInterval);
+
+                this.timeExpired = true;
+
+                this.submitAndExit();
+            }
+
+        }, 1000);
+    }
 
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
         this.stopAudio();
+        clearInterval(this.timerInterval);
     }
+    get formattedTime(): string {
 
+        const minutes = Math.floor(this.remainingSeconds / 60);
+
+        const seconds = this.remainingSeconds % 60;
+
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
     goBack(): void {
         this.router.navigate(['/training/levels'], {
             queryParams: { childId: this.childId, difficultyId: this.difficultyId }
@@ -463,17 +500,15 @@ export class TrainingGameComponent implements OnInit, OnDestroy {
     }
 
     goToNextLevel(): void {
-        const nextLevel = this.level + 1;
-        if (nextLevel > 3) {
-            this.router.navigate(['/training/levels'], {
-                queryParams: { childId: this.childId, difficultyId: this.difficultyId }
-            });
+
+        if (this.level >= 3) {
             return;
         }
 
-        this.router.navigate(['/training/game'], {
-            queryParams: { childId: this.childId, difficultyId: this.difficultyId, level: nextLevel }
-        });
+        this.lockedMessage =
+            `أحسنت! سيتم فتح ${this.nextLevelName} بعد 24 ساعة لمساعدة الطفل على تثبيت المهارات المكتسبة.`;
+
+        this.showLockedDialog = true;
     }
 
     private saveCurrentAnswer(): void {

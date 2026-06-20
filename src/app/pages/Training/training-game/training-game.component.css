@@ -315,6 +315,100 @@
     color: #16a34a;
     font-weight: 600;
 }
+.lock-dialog {
+    text-align: center;
+    padding: 1rem 0.5rem;
+}
+
+.lock-dialog__icon {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg,
+            #fef3c7,
+            #fde68a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lock-dialog__icon i {
+    font-size: 2.8rem;
+    color: #f59e0b;
+}
+
+.lock-dialog h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.lock-dialog p {
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: #475569;
+    margin-bottom: 1rem;
+}
+
+.lock-dialog__badge {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    border-radius: 16px;
+    padding: 0.85rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.lock-dialog__button {
+    min-width: 150px;
+}
+
+:host ::ng-deep .lock-dialog__button.p-button {
+    background: #22c55e;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    padding: 0.8rem 1.5rem;
+}
+.timer-box {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: #fff7ed;
+    border: 2px solid #f59e0b;
+    color: #92400e;
+    padding: .75rem 1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    width: fit-content;
+    margin-bottom: 1rem;
+}
+
+.timer-box i {
+    font-size: 1.2rem;
+}
+.timer-box--danger {
+    border-color: #ef4444;
+    color: #dc2626;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.04);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
 
 @keyframes slideUp {
     from {

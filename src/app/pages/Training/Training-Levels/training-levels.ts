@@ -2,7 +2,8 @@ import { TrainingService } from '@/core/services/training.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
+import { DialogModule } from "primeng/dialog";
 
 interface LevelCard {
     title: string;
@@ -21,7 +22,7 @@ interface LevelCard {
 @Component({
     selector: 'app-training-levels',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, DialogModule],
     templateUrl: './training-levels.html',
     styleUrls: ['./training-levels.css']
 })
@@ -77,9 +78,7 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.childId = this.getNumericQueryParam('childId') ?? this.getLocalStorageNumber('child_id');
         this.difficultyId = this.getNumericQueryParam('difficultyId') ?? this.getLocalStorageNumber('difficulty_id');
-        this.loadCompletedLevels();
-        
-        // this.applyUnlockRulesFromLocalStorage();
+        this.loadRoadmap();
     }
 
     ngOnDestroy(): void {
@@ -88,12 +87,11 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
     }
 
     startLevel(level: LevelCard): void {
-        if (level.disabled) {
+
+        if (level.buttonVariant === 'locked') {
             return;
         }
-        console.log('CHILD ID =', this.childId);
-        console.log('DIFFICULTY ID =', this.difficultyId);
-        console.log('LEVEL =', level.levelNumber);
+
         this.router.navigate(['/training/game'], {
             queryParams: {
                 childId: this.childId,
@@ -101,54 +99,62 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
                 level: level.levelNumber
             }
         });
-
     }
-    private loadCompletedLevels(): void {
+
+    private loadRoadmap(): void {
 
         if (!this.childId || !this.difficultyId) {
             return;
         }
 
         this.trainingService
-            .getTrainingResults(this.childId, this.difficultyId)
+            .getTrainingRoadmap(
+                this.childId,
+                this.difficultyId
+            )
             .subscribe({
+
                 next: (res) => {
 
-                    const completedLevels = res?.data || [];
+                    const roadmap = res.data?.[0];
 
-                    const completedLevelNumbers =
-                        completedLevels.map((x: any) => Number(x.level));
+                    if (!roadmap) {
+                        return;
+                    }
 
-                    const highestCompleted =
-                        completedLevelNumbers.length
-                            ? Math.max(...completedLevelNumbers)
-                            : 0;
+                    const currentLevel =
+                        Number(roadmap.current_level);
 
-                    const nextAvailableLevel = highestCompleted + 1;
+                    const locked =
+                        roadmap.is_locked;
 
                     this.levels = this.levels.map(level => {
 
-                        if (completedLevelNumbers.includes(level.levelNumber)) {
+                        if (level.levelNumber < currentLevel) {
 
                             return {
                                 ...level,
                                 buttonLabel: 'تم اجتيازه',
                                 buttonIcon: 'pi pi-check',
                                 buttonVariant: 'outline',
-                                disabled: false,
-                                badgeIcon: undefined
+                                disabled: false
                             };
                         }
 
-                        if (level.levelNumber === nextAvailableLevel) {
+                        if (level.levelNumber === currentLevel) {
 
                             return {
                                 ...level,
-                                buttonLabel: 'ابدأ التدريب',
-                                buttonIcon: 'pi pi-play',
-                                buttonVariant: 'solid',
-                                disabled: false,
-                                badgeIcon: undefined
+                                buttonLabel: locked
+                                    ? 'يفتح خلال 24 ساعة'
+                                    : 'ابدأ التدريب',
+                                buttonIcon: locked
+                                    ? 'pi pi-clock'
+                                    : 'pi pi-play',
+                                buttonVariant: locked
+                                    ? 'locked'
+                                    : 'solid',
+                                disabled: locked,
                             };
                         }
 
@@ -157,51 +163,11 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
                             buttonLabel: 'مقفل حالياً',
                             buttonIcon: 'pi pi-lock',
                             buttonVariant: 'locked',
-                            disabled: true,
-                            badgeIcon: 'pi pi-lock'
+                            disabled: true
                         };
                     });
                 }
             });
-    }
-
-    private applyUnlockRulesFromLocalStorage(): void {
-      
-        const raw = localStorage.getItem('trainingProgress');
-        if (!raw) {
-            return; 
-        }
-
-        try {
-            const progress = JSON.parse(raw) as any;
-            const currentLevel = Number(progress?.current_level);
-            const progressPercentage = Number(progress?.progress_percentage);
-
-            this.levels = this.levels.map((lvl) => {
-                const unlocked = currentLevel >= lvl.levelNumber || (lvl.levelNumber === 2 && progressPercentage >= 30);
-                if (unlocked) {
-                    return {
-                        ...lvl,
-                        disabled: false,
-                        buttonLabel: lvl.levelNumber === 3 ? 'ابدأ التدريب' : lvl.buttonLabel,
-                        buttonVariant: lvl.levelNumber === 1 ? 'solid' : (lvl.levelNumber === 2 ? 'outline' : 'solid'),
-                        buttonIcon: 'pi pi-play',
-                        badgeIcon: lvl.levelNumber === 3 ? undefined : lvl.badgeIcon
-                    };
-                }
-
-                return {
-                    ...lvl,
-                    disabled: true,
-                    buttonLabel: 'مقفل حالياً',
-                    buttonVariant: 'locked',
-                    buttonIcon: 'pi pi-lock',
-                    badgeIcon: 'pi pi-lock'
-                };
-            });
-        } catch {
-            
-        }
     }
 
     private getNumericQueryParam(paramName: string): number | null {
@@ -218,7 +184,7 @@ export class TrainingLevelsComponent implements OnInit, OnDestroy {
             return null;
         }
     }
-    
+
     goBack(): void {
         this.router.navigate(['/training']);
     }

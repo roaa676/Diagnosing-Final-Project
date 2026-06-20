@@ -12,7 +12,13 @@ class TrainingController extends Controller
 
     public function getTrainingRoadmap(Request $request, int $child_id)
     {
-        $progress = TrainingProgress::where('child_id', $child_id)->get();
+        $difficultyId = $request->query('difficulty_id');
+
+        $testType = \App\Models\LearningDifficulty::find($difficultyId)?->test_type;
+
+        $progress = TrainingProgress::where('child_id', $child_id)
+            ->where('training_type', $testType)
+            ->get();
 
         if ($progress->isEmpty()) {
             return response()->json([
@@ -22,16 +28,15 @@ class TrainingController extends Controller
         }
 
         $roadmap = $progress->map(function ($training) {
-            // التحقق هل المستوى متاح ولا لسه مقفول زمنياً
             $isLocked = Carbon::now()->lessThan($training->next_level_unlocks_at);
 
             return [
                 'training_type'       => $training->training_type,
                 'current_level'       => $training->current_level,
+                'next_level'          => $training->current_level + 1,
                 'progress_percentage' => $training->progress_percentage . '%',
                 'is_locked'           => $isLocked,
                 'unlocks_at'          => $training->next_level_unlocks_at ? Carbon::parse($training->next_level_unlocks_at)->diffForHumans() : 'متاح الآن',
-                // هترجع للفرونت إند: "يفتح بعد 23 ساعة" مثلاً
             ];
         });
 
@@ -67,11 +72,9 @@ class TrainingController extends Controller
             ], 404);
         }
 
-        // ترقية الطفل للمستوى التالي
         $nextLevel     = $training->current_level + 1;
-        $newPercentage = min($training->progress_percentage + 20, 100); // زيادة النسبة لحد أقصى 100%
+        $newPercentage = min($training->progress_percentage + 20, 100);
 
-        // تطبيق المعيار العالمي: قفل المستوى التالي لمدة 24 ساعة للمراجعة الذهنية
         $training->update([
             'current_level'         => $nextLevel,
             'progress_percentage'   => $newPercentage,
